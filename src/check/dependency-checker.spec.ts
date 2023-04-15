@@ -14,6 +14,7 @@ describe(DependencyChecker.name, () => {
 
         architecture = {
             name: 'TestArchitecture',
+            exclude: ['node_modules**'],
             artifacts: [
                 {
                     name: 'controller',
@@ -104,6 +105,12 @@ describe(DependencyChecker.name, () => {
         violation = checker.check(
             '/some/thing/that/is/not/defined.ts',
             dependency('/some/other/prefix/service/some-service.ts')
+        )
+        expect(violation).toBeUndefined()
+
+        violation = checker.check(
+            '/some/prefix/domain/some-service.ts',
+            dependency('node_modules:some/service/some-service.ts')
         )
         expect(violation).toBeUndefined()
     })
