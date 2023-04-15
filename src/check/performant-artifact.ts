@@ -7,7 +7,27 @@ export class PerformantArtifact {
     private readonly includePatterns: PathPattern[]
     private readonly excludePatterns: PathPattern[]
 
-    constructor(artifact: Artifact) {
+    static createFrom(artifacts: Artifact[]): PerformantArtifact[] {
+        const result = artifacts.map(it => new PerformantArtifact(it))
+
+        for (let i = 0; i < result.length; i++) {
+            if (artifacts[i].relaxed) {
+                this.applyRelaxed(i, result)
+            }
+        }
+
+        return result
+    }
+
+    private static applyRelaxed(targeIndex: number, result: PerformantArtifact[]): void {
+        const target = result[targeIndex]
+
+        for (let i = targeIndex + 1; i < result.length; i++) {
+            target.connectTo(result[i])
+        }
+    }
+
+    private constructor(artifact: Artifact) {
         this.name = artifact.name
         this.connectedTo = new Set(artifact.connectTo || [])
         this.connectedTo.add(artifact.name)

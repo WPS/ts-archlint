@@ -9,7 +9,7 @@ export class DependencyChecker {
     private globalExcludes: PathPattern[]
 
     constructor(private description: ArchitectureDescription) {
-        this.artifacts = this.compileArtifacts(description)
+        this.artifacts = PerformantArtifact.createFrom(description.artifacts)
         this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
     }
 
@@ -48,25 +48,5 @@ export class DependencyChecker {
         }
 
         return this.artifacts.find(it => it.matches(path))
-    }
-
-    private compileArtifacts(description: ArchitectureDescription): PerformantArtifact[] {
-        const result = description.artifacts.map(it => new PerformantArtifact(it))
-
-        for (let i = 0; i < result.length; i++) {
-            if (description.artifacts[i].relaxed) {
-                this.applyRelaxed(i, result)
-            }
-        }
-
-        return result
-    }
-
-    private applyRelaxed(targeIndex: number, result: PerformantArtifact[]): void {
-        const target = result[targeIndex]
-
-        for (let i = targeIndex + 1; i < result.length; i++) {
-            target.connectTo(result[i])
-        }
     }
 }
