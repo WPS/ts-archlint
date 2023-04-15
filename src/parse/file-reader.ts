@@ -1,5 +1,4 @@
 const fsp = require('fs').promises
-const readline = require('readline');
 
 export interface FileReader {
     readFile(path: string): Promise<string>

@@ -1,9 +1,26 @@
 import {Dependency} from "./dependency";
+import {CodeFile} from "./code-file";
 
-const regex = /from\s+['"](.+?)['"];?/
+import {readFile as fsReadFile} from 'fs/promises'
+
+const regex = /from\s*['"](.+?)['"];?/
+
 
 export class DependencyParser {
-    parseDependencies(fileContent: string): Dependency[] {
+    constructor(private readFile: (path: string) => Promise<string> = path => fsReadFile(path).then(it => it.toString())) {
+    }
+
+    async parseFile(path: string): Promise<CodeFile> {
+        const content = await this.readFile(path)
+        const dependencies = this.parseDependencies(content)
+
+        return {
+            path,
+            dependencies
+        }
+    }
+
+    private parseDependencies(fileContent: string): Dependency[] {
         const result: Dependency[] = []
 
         const lines = fileContent.split('\n')

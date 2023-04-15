@@ -1,24 +1,38 @@
 import {DependencyParser} from "./dependency-parser";
-import {Dependency} from "./dependency";
+import {CodeFile} from "./code-file";
 
 describe(DependencyParser.name, () => {
-    let parser = new DependencyParser()
+    const filePath = 'path/to/file'
+    let fileContent: string
+    let parser: DependencyParser
 
-    it('should parse empty dependencies', () => {
-        const file = `
+    beforeEach(() => {
+        parser = new DependencyParser(it => new Promise(resolve => {
+            expect(it).toBe(filePath)
+            resolve(fileContent)
+        }))
+    })
+
+    it('should parse empty dependencies', async () => {
+        fileContent = `
         class WithoutDependencies {
           private value = 'singleQuoted'
           private otherValue = "double quoted"
         }
         `
 
-        const dependencies = parser.parseDependencies(file)
+        const dependencies = await parser.parseFile(filePath)
+        const expected: CodeFile = {
+            path: filePath,
+            dependencies: []
+        }
 
-        expect(dependencies).toEqual([])
+        expect(dependencies).toEqual(expected)
     })
 
-    it('should parse existing dependencies', () => {
-        const file = `import {Dependency1} from "./dependency1";
+    it('should parse existing dependencies', async () => {
+
+        fileContent = `import {Dependency1} from "./dependency1";
         
         import {Dependency2} from '../../some-folder-dependency2'
         import {External} from 'external-lib'; // with comment after
@@ -29,22 +43,25 @@ describe(DependencyParser.name, () => {
         }
         `
 
-        const dependencies = parser.parseDependencies(file)
-        const expected: Dependency[] = [
-            {
-                line: 1,
-                path: './dependency1'
-            },
-            {
-                line: 3,
-                path: '../../some-folder-dependency2'
-            },
-            {
-                line: 4,
-                path: 'external-lib'
-            }
-        ]
+        const parsed = await parser.parseFile(filePath)
+        const expected: CodeFile = {
+            path: filePath,
+            dependencies: [
+                {
+                    line: 1,
+                    path: './dependency1'
+                },
+                {
+                    line: 3,
+                    path: '../../some-folder-dependency2'
+                },
+                {
+                    line: 4,
+                    path: 'external-lib'
+                }
+            ]
+        }
 
-        expect(dependencies).toEqual(expected)
+        expect(parsed).toEqual(expected)
     })
 });
