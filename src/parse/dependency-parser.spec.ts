@@ -2,7 +2,7 @@ import {DependencyParser} from "./dependency-parser";
 import {CodeFile} from "./code-file";
 
 describe(DependencyParser.name, () => {
-    const filePath = 'path/to/file'
+    const filePath = '/path/to/file/file.ts'
     let fileContent: string
     let parser: DependencyParser
 
@@ -34,7 +34,7 @@ describe(DependencyParser.name, () => {
 
         fileContent = `import {Dependency1} from "./dependency1";
         
-        import {Dependency2} from '../../some-folder-dependency2'
+        import {Dependency2} from '../../some-folder/dependency2'
         import {External} from 'external-lib'; // with comment after
         
         class WithDependencies {
@@ -49,15 +49,15 @@ describe(DependencyParser.name, () => {
             dependencies: [
                 {
                     line: 1,
-                    path: './dependency1'
+                    path: '/path/to/file/dependency1.ts'
                 },
                 {
                     line: 3,
-                    path: '../../some-folder-dependency2'
+                    path: '/path/some-folder/dependency2.ts'
                 },
                 {
                     line: 4,
-                    path: 'external-lib'
+                    path: 'node_modules:external-lib'
                 }
             ]
         }
