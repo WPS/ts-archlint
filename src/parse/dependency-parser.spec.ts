@@ -2,20 +2,21 @@ import {DependencyParser} from "./dependency-parser";
 import {CodeFile} from "./code-file";
 
 describe(DependencyParser.name, () => {
-    const filePath = '/path/to/file/file.ts'
+    const filePath = '/long/path/prefix/path/to/file/file.ts'
     let fileContent: string
     let parser: DependencyParser
 
     beforeEach(() => {
-        parser = new DependencyParser(it => new Promise(resolve => {
-            expect(it).toBe(filePath)
-            resolve(fileContent)
-        }))
+        parser = new DependencyParser(
+            '/long/path/prefix',
+            it => new Promise(resolve => {
+                expect(it).toBe(filePath)
+                resolve(fileContent)
+            }))
     })
 
     it('should parse empty dependencies', async () => {
-        fileContent = `
-        class WithoutDependencies {
+        fileContent = `class WithoutDependencies {
           private value = 'singleQuoted'
           private otherValue = "double quoted"
         }
@@ -23,7 +24,8 @@ describe(DependencyParser.name, () => {
 
         const dependencies = await parser.parseFile(filePath)
         const expected: CodeFile = {
-            path: filePath,
+            path: 'path/to/file/file.ts',
+            lines: 5,
             dependencies: []
         }
 
@@ -45,15 +47,16 @@ describe(DependencyParser.name, () => {
 
         const parsed = await parser.parseFile(filePath)
         const expected: CodeFile = {
-            path: filePath,
+            path: 'path/to/file/file.ts',
+            lines: 10,
             dependencies: [
                 {
                     line: 1,
-                    path: '/path/to/file/dependency1.ts'
+                    path: 'path/to/file/dependency1.ts'
                 },
                 {
                     line: 3,
-                    path: '/path/some-folder/dependency2.ts'
+                    path: 'path/some-folder/dependency2.ts'
                 },
                 {
                     line: 4,
