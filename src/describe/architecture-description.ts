@@ -1,14 +1,13 @@
-import {PathPattern} from "../match/path-pattern";
-
 export type ArtifactPath = string
 
 export interface Artifact {
+    name: string
     relaxed?: true
     public?: true
-    include?: PathPattern[]
-    exclude?: PathPattern[]
+    include?: string[]
+    exclude?: string[]
     connectTo?: ArtifactPath[]
-    children: { [artifactName: string]: Artifact }
+    children?: Artifact[]
 }
 
 export type ArchitectureDescription = {

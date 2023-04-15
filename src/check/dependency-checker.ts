@@ -1,23 +1,58 @@
 import {DependencyViolation} from "./dependency-violation";
 import {ArchitectureDescription, Artifact} from "../describe/architecture-description";
-import {PathMatcher} from "../match/path-matcher";
+import {Dependency} from "../parse/dependency";
+import {PathPattern} from "./path-pattern";
 
-export class ArtifactDependencyChecker implements DependencyChecker {
+export class DependencyChecker {
+    private graph: Map<string, Set<string>>
+
     constructor(private description: ArchitectureDescription) {
+        this.graph = this.buildConnectionGraph(description)
     }
 
-    check(from: string, to: string): DependencyViolation | undefined {
-        return undefined
+    check(path: string, dependency: Dependency): DependencyViolation | undefined {
+        const from = this.findArtifact(path)
+        if (!from) {
+            return undefined
+        }
+
+        const to = this.findArtifact(dependency.path)
+        if (!to) {
+            return undefined
+        }
+
+
+        if (this.areConnected(from, to)) {
+            return undefined
+        }
+
+        return {
+            from: {
+                artifact: from.name,
+                path,
+                line: dependency.line
+            },
+            to: {
+                artifact: to.name,
+                path: dependency.path
+            }
+        }
+    }
+
+    private areConnected(from: Artifact, to: Artifact): boolean {
+        const connections = this.graph.get(from.name)
+        if (!connections) {
+            return false
+        }
+        return connections.has(to.name)
     }
 
     private findArtifact(path: string): Artifact | undefined {
-        for (const key of Object.keys(this.description)) {
-            const artifact: Artifact = this.description[key]
+        return this.description.artifacts.find(it => this.matchesArtifact(path, it))
+    }
 
-
-        }
-
-        return undefined
+    private matchesAny(path: string, patterns: string[] | undefined): boolean {
+        return patterns != null && patterns.some(pattern => new PathPattern(pattern).matches(path))
     }
 
     private matchesArtifact(path: string, artifact: Artifact | undefined): boolean {
@@ -25,7 +60,7 @@ export class ArtifactDependencyChecker implements DependencyChecker {
             return false
         }
 
-        if (PathMatcher.matchesAny(path, artifact.exclude)) {
+        if (this.matchesAny(path, artifact.exclude)) {
             return false
         }
 
@@ -35,12 +70,21 @@ export class ArtifactDependencyChecker implements DependencyChecker {
             return false
         }
 
-        if (PathMatcher.matchesAny(path, artifact.include)) {
+        if (this.matchesAny(path, artifact.include)) {
             return true
         }
+        return false
     }
-}
 
-export interface DependencyChecker {
-    check(from: string, to: string): DependencyViolation | undefined
+    private buildConnectionGraph(description: ArchitectureDescription): Map<string, Set<string>> {
+        const result = new Map<string, Set<string>>()
+
+        for (const artifact of description.artifacts) {
+            const directlyConnected = artifact.connectTo || []
+            directlyConnected.push(artifact.name)
+            result.set(artifact.name, new Set(directlyConnected))
+        }
+
+        return result
+    }
 }
