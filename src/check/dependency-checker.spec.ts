@@ -23,7 +23,7 @@ describe(DependencyChecker.name, () => {
                 {
                     name: 'service',
                     include: ['**/service/*'],
-                    connectTo: ['entity', 'repository']
+                    relaxed: true
                 },
                 {
                     name: 'repository',

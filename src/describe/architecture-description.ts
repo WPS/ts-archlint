@@ -1,16 +1,9 @@
+import {Artifact} from "./artifact";
+
 export type ArtifactPath = string
 
-export interface Artifact {
-    name: string
-    relaxed?: true
-    public?: true
-    include?: string[]
-    exclude?: string[]
-    connectTo?: ArtifactPath[]
-    children?: Artifact[]
-}
-
-export type ArchitectureDescription = {
+export interface ArchitectureDescription {
     name: string
     artifacts: Artifact[]
 }
+

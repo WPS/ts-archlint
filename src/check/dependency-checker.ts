@@ -1,13 +1,13 @@
 import {DependencyViolation} from "./dependency-violation";
-import {ArchitectureDescription, Artifact} from "../describe/architecture-description";
+import {ArchitectureDescription} from "../describe/architecture-description";
 import {Dependency} from "../parse/dependency";
-import {PathPattern} from "./path-pattern";
+import {PerformantArtifact} from "./performant-artifact";
 
 export class DependencyChecker {
-    private graph: Map<string, Set<string>>
+    private artifacts: PerformantArtifact[]
 
     constructor(private description: ArchitectureDescription) {
-        this.graph = this.buildConnectionGraph(description)
+        this.artifacts = this.compileArtifacts(description)
     }
 
     check(path: string, dependency: Dependency): DependencyViolation | undefined {
@@ -22,7 +22,7 @@ export class DependencyChecker {
         }
 
 
-        if (this.areConnected(from, to)) {
+        if (from.isConnectedTo(to)) {
             return undefined
         }
 
@@ -39,52 +39,27 @@ export class DependencyChecker {
         }
     }
 
-    private areConnected(from: Artifact, to: Artifact): boolean {
-        const connections = this.graph.get(from.name)
-        if (!connections) {
-            return false
-        }
-        return connections.has(to.name)
+    private findArtifact(path: string): PerformantArtifact | undefined {
+        return this.artifacts.find(it => it.matches(path))
     }
 
-    private findArtifact(path: string): Artifact | undefined {
-        return this.description.artifacts.find(it => this.matchesArtifact(path, it))
-    }
+    private compileArtifacts(description: ArchitectureDescription): PerformantArtifact[] {
+        const result = description.artifacts.map(it => new PerformantArtifact(it))
 
-    private matchesAny(path: string, patterns: string[] | undefined): boolean {
-        return patterns != null && patterns.some(pattern => new PathPattern(pattern).matches(path))
-    }
-
-    private matchesArtifact(path: string, artifact: Artifact | undefined): boolean {
-        if (artifact == null) {
-            return false
-        }
-
-        if (this.matchesAny(path, artifact.exclude)) {
-            return false
-        }
-
-        const children: Artifact[] = Object.values(artifact.children || {})
-
-        if (children.some(it => this.matchesArtifact(path, it))) {
-            return false
-        }
-
-        if (this.matchesAny(path, artifact.include)) {
-            return true
-        }
-        return false
-    }
-
-    private buildConnectionGraph(description: ArchitectureDescription): Map<string, Set<string>> {
-        const result = new Map<string, Set<string>>()
-
-        for (const artifact of description.artifacts) {
-            const directlyConnected = artifact.connectTo || []
-            directlyConnected.push(artifact.name)
-            result.set(artifact.name, new Set(directlyConnected))
+        for (let i = 0; i < result.length; i++) {
+            if (description.artifacts[i].relaxed) {
+                this.applyRelaxed(i, result)
+            }
         }
 
         return result
+    }
+
+    private applyRelaxed(targeIndex: number, result: PerformantArtifact[]): void {
+        const target = result[targeIndex]
+
+        for (let i = targeIndex + 1; i < result.length; i++) {
+            target.connectTo(result[i])
+        }
     }
 }
