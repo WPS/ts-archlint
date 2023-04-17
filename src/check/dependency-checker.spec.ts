@@ -19,21 +19,22 @@ describe(DependencyChecker.name, () => {
                 {
                     name: 'controller',
                     include: ['**/web/*'],
-                    connectTo: ['service', 'entity']
+                    mayUse: ['service']
                 },
                 {
                     name: 'service',
                     include: ['**/service/*'],
-                    relaxed: true
+                    mayUseAllBelow: true
                 },
                 {
                     name: 'repository',
                     include: ['**/repository/*'],
-                    connectTo: ['entity']
+                    mayUse: ['entity']
                 },
                 {
                     name: 'entity',
-                    include: ['**/domain/*']
+                    include: ['**/domain/*'],
+                    mayBeUsedFromAllAbove: true
                 }
             ]
         }

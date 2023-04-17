@@ -1,8 +1,8 @@
 export interface Artifact {
     name: string
-    relaxed?: true
-    public?: true
+    mayUseAllBelow?: true
+    mayBeUsedFromAllAbove?: true
     include?: string[]
     exclude?: string[]
-    connectTo?: string[]
+    mayUse?: string[]
 }

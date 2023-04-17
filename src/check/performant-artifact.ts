@@ -11,15 +11,19 @@ export class PerformantArtifact {
         const result = artifacts.map(it => new PerformantArtifact(it))
 
         for (let i = 0; i < result.length; i++) {
-            if (artifacts[i].relaxed) {
-                this.applyRelaxed(i, result)
+            if (artifacts[i].mayUseAllBelow) {
+                PerformantArtifact.applyMayUseAllBelow(i, result)
+            }
+
+            if (artifacts[i].mayBeUsedFromAllAbove) {
+                PerformantArtifact.applyMayBeUsedFromAbove(i, result)
             }
         }
 
         return result
     }
 
-    private static applyRelaxed(targeIndex: number, result: PerformantArtifact[]): void {
+    private static applyMayUseAllBelow(targeIndex: number, result: PerformantArtifact[]): void {
         const target = result[targeIndex]
 
         for (let i = targeIndex + 1; i < result.length; i++) {
@@ -27,9 +31,17 @@ export class PerformantArtifact {
         }
     }
 
+    private static applyMayBeUsedFromAbove(targeIndex: number, result: PerformantArtifact[]): void {
+        const target = result[targeIndex]
+
+        for (let i = targeIndex - 1; i >= 0; i--) {
+            result[i].connectTo(target)
+        }
+    }
+
     private constructor(artifact: Artifact) {
         this.name = artifact.name
-        this.connectedTo = new Set(artifact.connectTo || [])
+        this.connectedTo = new Set(artifact.mayUse || [])
         this.connectedTo.add(artifact.name)
 
         this.includePatterns = (artifact.include || []).map(it => new PathPattern(it))
