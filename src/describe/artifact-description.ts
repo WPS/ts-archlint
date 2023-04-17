@@ -1,4 +1,4 @@
-export interface Artifact {
+export interface ArtifactDescription {
     name: string
     mayUseAllBelow?: true
     mayBeUsedFromAllAbove?: true

@@ -42,12 +42,20 @@ describe(DependencyChecker.name, () => {
         checker = new DependencyChecker(architecture)
     })
 
-    it('should report violating controller dependencies', () => {
-        violation = checker.check(
-            '/some/prefix/web/some-controller.ts',
-            {path: '/blabla/other/prefix/repository/some-repository.ts', line: 7}
-        )
-        expect(violation).toEqual({
+    describe('should report violations if:', () => {
+        expectViolation({
+            from: {
+                artifact: 'entity',
+                path: '/some/domain/entity.ts',
+                line: 42
+            },
+            to: {
+                artifact: 'repository',
+                path: '/some/repository/repo.ts',
+            }
+        })
+
+        expectViolation({
             from: {
                 artifact: 'controller',
                 path: '/some/prefix/web/some-controller.ts',
@@ -58,6 +66,27 @@ describe(DependencyChecker.name, () => {
                 path: '/blabla/other/prefix/repository/some-repository.ts'
             }
         })
+
+        expectViolation({
+            from: {
+                artifact: 'service',
+                path: '/some/other/nested/service/mapper.ts',
+                line: 3
+            },
+            to: {
+                artifact: 'controller',
+                path: '/some/deeply/nested/web/controller.ts',
+            }
+        })
+
+        function expectViolation(expectedViolation: DependencyViolation): void {
+            const {from, to} = expectedViolation
+
+            it(`${from.artifact} accesses ${to.artifact}`, () => {
+                violation = checker.check(from.path, {line: from.line, path: to.path})
+                expect(violation).toEqual(expectedViolation)
+            })
+        }
     })
 
     it('should NOT report non violating dependencies', () => {

@@ -1,8 +1,8 @@
-import {Artifact} from "./artifact";
+import {ArtifactDescription} from "./artifact-description";
 
 export interface ArchitectureDescription {
     name: string
     exclude?: string[]
-    artifacts: Artifact[]
+    artifacts: ArtifactDescription[]
 }
 

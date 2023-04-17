@@ -1,15 +1,15 @@
 import {DependencyViolation} from "./dependency-violation";
 import {ArchitectureDescription} from "../describe/architecture-description";
 import {Dependency} from "../parse/dependency";
-import {PerformantArtifact} from "./performant-artifact";
+import {Artifact} from "./artifact";
 import {PathPattern} from "./path-pattern";
 
 export class DependencyChecker {
-    private artifacts: PerformantArtifact[]
+    private artifacts: Artifact[]
     private globalExcludes: PathPattern[]
 
     constructor(private description: ArchitectureDescription) {
-        this.artifacts = PerformantArtifact.createFrom(description.artifacts)
+        this.artifacts = Artifact.createFrom(description.artifacts)
         this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
     }
 
@@ -42,7 +42,7 @@ export class DependencyChecker {
         }
     }
 
-    private findArtifact(path: string): PerformantArtifact | undefined {
+    private findArtifact(path: string): Artifact | undefined {
         if (this.globalExcludes.some(it => it.matches(path))) {
             return undefined
         }

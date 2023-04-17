@@ -1,29 +1,29 @@
 import {PathPattern} from "./path-pattern";
-import {Artifact} from "../describe/artifact";
+import {ArtifactDescription} from "../describe/artifact-description";
 
-export class PerformantArtifact {
+export class Artifact {
     readonly name: string
     private readonly connectedTo: Set<string>
     private readonly includePatterns: PathPattern[]
     private readonly excludePatterns: PathPattern[]
 
-    static createFrom(artifacts: Artifact[]): PerformantArtifact[] {
-        const result = artifacts.map(it => new PerformantArtifact(it))
+    static createFrom(artifacts: ArtifactDescription[]): Artifact[] {
+        const result = artifacts.map(it => new Artifact(it))
 
         for (let i = 0; i < result.length; i++) {
             if (artifacts[i].mayUseAllBelow) {
-                PerformantArtifact.applyMayUseAllBelow(i, result)
+                Artifact.applyMayUseAllBelow(i, result)
             }
 
             if (artifacts[i].mayBeUsedFromAllAbove) {
-                PerformantArtifact.applyMayBeUsedFromAbove(i, result)
+                Artifact.applyMayBeUsedFromAbove(i, result)
             }
         }
 
         return result
     }
 
-    private static applyMayUseAllBelow(targeIndex: number, result: PerformantArtifact[]): void {
+    private static applyMayUseAllBelow(targeIndex: number, result: Artifact[]): void {
         const target = result[targeIndex]
 
         for (let i = targeIndex + 1; i < result.length; i++) {
@@ -31,7 +31,7 @@ export class PerformantArtifact {
         }
     }
 
-    private static applyMayBeUsedFromAbove(targeIndex: number, result: PerformantArtifact[]): void {
+    private static applyMayBeUsedFromAbove(targeIndex: number, result: Artifact[]): void {
         const target = result[targeIndex]
 
         for (let i = targeIndex - 1; i >= 0; i--) {
@@ -39,7 +39,7 @@ export class PerformantArtifact {
         }
     }
 
-    private constructor(artifact: Artifact) {
+    private constructor(artifact: ArtifactDescription) {
         this.name = artifact.name
         this.connectedTo = new Set(artifact.mayUse || [])
         this.connectedTo.add(artifact.name)
@@ -59,11 +59,11 @@ export class PerformantArtifact {
         return false
     }
 
-    isConnectedTo({name}: PerformantArtifact): boolean {
+    isConnectedTo({name}: Artifact): boolean {
         return this.connectedTo.has(name)
     }
 
-    connectTo(artifact: PerformantArtifact): void {
+    connectTo(artifact: Artifact): void {
         this.connectedTo.add(artifact.name)
     }
 }
