@@ -10,7 +10,6 @@ export class PathPattern {
     }
 
     matches(path: string): boolean {
-        console.log(this.regex, path)
         return this.regex.test(path)
     }
 }

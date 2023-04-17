@@ -3,6 +3,7 @@ import {ArchitectureDescription} from "../describe/architecture-description";
 import {Dependency} from "../parse/dependency";
 import {Artifact} from "./artifact";
 import {PathPattern} from "./path-pattern";
+import {CodeFile} from "../parse/code-file";
 
 export class DependencyChecker {
     private artifacts: Artifact[]
@@ -11,6 +12,26 @@ export class DependencyChecker {
     constructor(private description: ArchitectureDescription) {
         this.artifacts = Artifact.createFrom(description.artifacts)
         this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
+    }
+
+    checkAll(files: CodeFile[]): DependencyViolation[] {
+        console.log(`Checking dependencies against rule ${this.description.name}`)
+
+        const result: DependencyViolation[] = []
+
+        let count = 0
+        for (const file of files) {
+            for (const dependency of file.dependencies) {
+                const violation = this.check(file.path, dependency)
+                if (violation) {
+                    result.push(violation)
+                }
+                count++
+            }
+        }
+
+        console.log(`Analyzed ${count} dependencies, found ${result.length} violations`)
+        return result
     }
 
     check(path: string, dependency: Dependency): DependencyViolation | undefined {

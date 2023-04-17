@@ -5,4 +5,3 @@ export interface ArchitectureDescription {
     exclude?: string[]
     artifacts: ArtifactDescription[]
 }
-

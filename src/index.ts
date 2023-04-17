@@ -1,13 +1,6 @@
 #!/bin/env node
-import {DependencyParser} from "./parse/dependency-parser";
-
-const [nodePath, jsPath, targetPath] = process.argv
-
-async function main() {
-    const parsed = await new DependencyParser(targetPath).parseFiles()
-    //console.log(JSON.stringify(parsed))
-}
+import {ArchlintCli} from "./cli/archlint-cli";
 
 (async () => {
-    await main()
+    await new ArchlintCli().run()
 })()
