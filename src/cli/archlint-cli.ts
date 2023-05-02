@@ -11,7 +11,7 @@ import {ArchlintConfig} from "../describe/archlint-config";
 export class ArchlintCli {
     private reader = new DescriptionReader()
 
-    async run(): Promise<void> {
+    async run(): Promise<number> {
         let [nodePath, jsPath, configPath] = process.argv
 
         const config = await this.readConfig(configPath)
@@ -27,10 +27,19 @@ export class ArchlintCli {
         const parsed = await new DependencyParser(config.srcRoot).parseFiles()
 
         const reporter = new ResultReporter()
+
+        let returnCode = 0
+
         for (const checker of checkers) {
             const violations = checker.checkAll(parsed)
             reporter.reportViolations(violations)
+
+            if (violations.length > 0) {
+                returnCode = 1
+            }
         }
+        console.log("Exit code: " + returnCode)
+        return returnCode
     }
 
     private async findArchitectureFiles(config: ArchlintConfig): Promise<string[]> {

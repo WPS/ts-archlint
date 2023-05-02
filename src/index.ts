@@ -2,5 +2,8 @@
 import {ArchlintCli} from "./cli/archlint-cli";
 
 (async () => {
-    await new ArchlintCli().run()
+    const exitCode = await new ArchlintCli().run()
+    if (exitCode !== 0) {
+        process.exitCode = exitCode
+    }
 })()
