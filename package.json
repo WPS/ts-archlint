@@ -1,8 +1,14 @@
 {
   "name": "archlint",
-  "version": "1.0.0-SNAPSHOT",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "Simple dependency checker for typescript files",
+  "main": "dist/index.js",
+  "bin": {
+    "archlint": "dist/index.js"
+  },
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "build": "tsup src/index.ts",
     "publishLocal": "npm run build && npm pack --pack-destination ./packed",
@@ -10,8 +16,6 @@
     "test": "jest --config ./jest.config.js --watchAll",
     "test:ci": "jest --config ./jest.config.js --collectCoverage --runInBand"
   },
-  "keywords": [],
-  "author": "niklas.kopp",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.4.0",
