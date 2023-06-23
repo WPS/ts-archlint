@@ -1,0 +1,21 @@
+image: node:18
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - npm install
+    - npm run test:ci
+    - npm run build
+    - node dist/index.js .archlint/config.json
+  cache:
+    key: archlint
+    paths:
+      - node_modules
+  artifacts:
+    paths:
+      - ./dist
+    expire_in: 2 weeks
+  coverage: '/All files.+\s+(\d+\.\d+)\s+\|\s*$/'
