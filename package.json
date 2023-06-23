@@ -1,6 +1,6 @@
 {
   "name": "ts-archlint",
-  "version": "0.1.0",
+  "version": "0.0.0-SNAPSHOT",
   "description": "Simple dependency checker for typescript files",
   "main": "dist/index.js",
   "bin": {
@@ -14,7 +14,6 @@
   },
   "scripts": {
     "build": "tsup src/index.ts",
-    "publishLocal": "npm run build && npm pack --pack-destination ./packed",
     "start": "npm run build -- --watch",
     "test": "jest --config ./jest.config.js --watchAll",
     "test:ci": "jest --config ./jest.config.js --collectCoverage --runInBand"
