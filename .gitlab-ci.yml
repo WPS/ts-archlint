@@ -15,10 +15,6 @@ build:
     key: archlint
     paths:
       - node_modules
-  artifacts:
-    paths:
-      - ./dist
-    expire_in: 2 weeks
   coverage: '/All files.+\s+(\d+\.\d+)\s+\|\s*$/'
 
 publish:
@@ -27,5 +23,6 @@ publish:
     - tags
   script:
     - npm version $CI_COMMIT_TAG
+    - npm run build
     - npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
     - npm publish
