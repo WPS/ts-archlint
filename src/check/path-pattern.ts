@@ -5,6 +5,7 @@ export class PathPattern {
         const regexString = pattern
             .split("**").join(".+")
             .split("*").join("[^/\\\\]+")
+            .split(".+").join(".*")
 
         this.regex = RegExp("^" + regexString + "$")
     }

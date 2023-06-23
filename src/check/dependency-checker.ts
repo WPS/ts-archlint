@@ -4,6 +4,7 @@ import {Dependency} from "../parse/dependency";
 import {Artifact} from "./artifact";
 import {PathPattern} from "./path-pattern";
 import {CodeFile} from "../parse/code-file";
+import {Logger} from "../common/logger";
 
 export class DependencyChecker {
     private artifacts: Artifact[]
@@ -15,7 +16,7 @@ export class DependencyChecker {
     }
 
     checkAll(files: CodeFile[]): DependencyViolation[] {
-        console.log(`Checking dependencies against rule ${this.description.name}`)
+        Logger.info(`Checking dependencies against rule ${this.description.name}`)
 
         const result: DependencyViolation[] = []
 
@@ -30,23 +31,29 @@ export class DependencyChecker {
             }
         }
 
-        console.log(`Analyzed ${count} dependencies, found ${result.length} violations`)
+        Logger.info(`Analyzed ${count} dependencies, found ${result.length} violations`)
         return result
     }
 
     check(path: string, dependency: Dependency): DependencyViolation | undefined {
+        Logger.debug("Checking " + path + " -> " + dependency.path)
+
+        if (this.globalExcludes.some(it => it.matches(path) || it.matches(dependency.path))) {
+            Logger.debug("Globally excluded -> OK")
+            return undefined
+        }
+
         const from = this.findArtifact(path)
         if (!from) {
+            Logger.debug("Not described -> OK")
+            // files that are not described are not checked
             return undefined
         }
 
         const to = this.findArtifact(dependency.path)
-        if (!to) {
-            return undefined
-        }
 
-
-        if (from.isConnectedTo(to)) {
+        if (to && from.isConnectedTo(to)) {
+            Logger.debug("Connected from " + from.name + " to " + to.name + " -> OK")
             return undefined
         }
 
@@ -57,17 +64,13 @@ export class DependencyChecker {
                 line: dependency.line
             },
             to: {
-                artifact: to.name,
+                artifact: to?.name || null,
                 path: dependency.path
             }
         }
     }
 
     private findArtifact(path: string): Artifact | undefined {
-        if (this.globalExcludes.some(it => it.matches(path))) {
-            return undefined
-        }
-
         return this.artifacts.find(it => it.matches(path))
     }
 }

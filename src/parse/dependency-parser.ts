@@ -3,6 +3,7 @@ import {CodeFile} from "./code-file";
 
 import {readdir, readFile} from 'fs/promises'
 import {dirname, join, relative} from 'path'
+import {Logger} from "../common/logger";
 
 const regex = /from\s*['"](.+?)['"];?/
 
@@ -16,12 +17,12 @@ export class DependencyParser {
         const result = await this.parseFilesRecursively(this.rootPath)
 
         const lines = result.map(it => it.lines).reduce((a, b) => a + b, 0)
-        console.log(`Done parsing ${result.length} files (${lines} lines total)`)
+        Logger.info(`Done parsing ${result.length} files (${lines} lines total)`)
         return result
     }
 
     private async parseFilesRecursively(directory: string): Promise<CodeFile[]> {
-        console.log('parsing directory ' + directory)
+        Logger.debug('parsing directory ' + directory)
 
         const result: CodeFile[] = []
 
@@ -47,11 +48,14 @@ export class DependencyParser {
         const content = await this.read(path)
         const [dependencies, lines] = this.parseDependencies(dirname(path), content)
 
-        return {
+        const codeFile: CodeFile = {
             path: this.toForwardSlashes(relative(this.rootPath, path)),
             lines,
             dependencies
-        }
+        };
+
+        Logger.debug("Parsed file", codeFile)
+        return codeFile
     }
 
     private parseDependencies(sourcePath: string, fileContent: string): [Dependency[], number] {

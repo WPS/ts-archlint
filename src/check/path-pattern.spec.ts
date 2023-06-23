@@ -10,6 +10,7 @@ describe(PathPattern.name, () => {
     it('should match correct paths', () => {
         expect(pattern.matches("/some/prefix/service/ThisIsAService")).toBe(true)
         expect(pattern.matches("/some/other/servicePrefix/service/ThisIsToo")).toBe(true)
+        expect(pattern.matches("/service/ThisIsToo")).toBe(true)
     })
 
     it('should NOT match incorrect package', () => {

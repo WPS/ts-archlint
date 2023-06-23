@@ -5,5 +5,5 @@ interface ViolationEdge {
 
 export interface DependencyViolation {
     from: ViolationEdge & { line: number }
-    to: ViolationEdge
+    to: ViolationEdge & { artifact: string | null }
 }

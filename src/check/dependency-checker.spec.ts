@@ -69,6 +69,18 @@ describe(DependencyChecker.name, () => {
 
         expectViolation({
             from: {
+                artifact: 'controller',
+                path: '/some/prefix/web/some-controller.ts',
+                line: 7
+            },
+            to: {
+                artifact: null,
+                path: '/blabla/something/completely/different.ts'
+            }
+        })
+
+        expectViolation({
+            from: {
                 artifact: 'service',
                 path: '/some/other/nested/service/mapper.ts',
                 line: 3
@@ -123,12 +135,6 @@ describe(DependencyChecker.name, () => {
         violation = checker.check(
             '/some/prefix/service/some-service.ts',
             dependency('/some/other/prefix/repository/repo.ts')
-        )
-        expect(violation).toBeUndefined()
-
-        violation = checker.check(
-            '/some/prefix/service/some-service.ts',
-            dependency('/some/other/thing/that/is/not/defined.ts')
         )
         expect(violation).toBeUndefined()
 

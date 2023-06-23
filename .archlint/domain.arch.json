@@ -1,0 +1,57 @@
+{
+  "name": "domain-layers",
+  "exclude": [
+    "node_modules**",
+    "**.spec.ts"
+  ],
+  "artifacts": [
+    {
+      "name": "cli",
+      "include": [
+        "cli/**"
+      ],
+      "mayUseAllBelow": true
+    },
+    {
+      "name": "report",
+      "include": [
+        "report/**"
+      ],
+      "mayUse": [
+        "check"
+      ]
+    },
+    {
+      "name": "check",
+      "include": [
+        "check/**"
+      ],
+      "mayUse": [
+        "describe",
+        "parse"
+      ]
+    },
+    {
+      "name": "describe",
+      "include": [
+        "describe/**"
+      ],
+      "mayUse": [
+        "parse"
+      ]
+    },
+    {
+      "name": "parse",
+      "include": [
+        "parse/**"
+      ]
+    },
+    {
+      "name": "common",
+      "include": [
+        "common/**"
+      ],
+      "mayBeUsedFromAllAbove": true
+    }
+  ]
+}
