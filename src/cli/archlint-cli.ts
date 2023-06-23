@@ -21,7 +21,7 @@ export class ArchlintCli {
         const checkers: DependencyChecker[] = []
         const archFiles = await this.findArchitectureFiles(config)
 
-        const reader = new DescriptionReader(config)
+        const reader = new DescriptionReader()
 
         for (const archFile of archFiles) {
             const fileContent = await readFile(archFile).then(it => it.toString())

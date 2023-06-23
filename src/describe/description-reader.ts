@@ -1,13 +1,21 @@
 import {ArchitectureDescription} from "./architecture-description";
-import {ArchlintConfig} from "./archlint-config";
 
 export class DescriptionReader {
-    constructor(private config: ArchlintConfig) {
-    }
 
     readDesription(fileContent: string): ArchitectureDescription {
-        // TODO validation
+        const description: Partial<ArchitectureDescription> & unknown = JSON.parse(fileContent)
+        if (!description.name) {
+            throw new Error("name is required!")
+        }
 
-        return JSON.parse(fileContent)
+        if (!description.artifacts) {
+            throw new Error("artifacts are required")
+        }
+
+        return {
+            name: description.name,
+            artifacts: description.artifacts,
+            ...description
+        }
     }
 }
