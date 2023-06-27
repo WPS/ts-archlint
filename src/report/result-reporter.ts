@@ -2,21 +2,33 @@ import {DependencyViolation} from "../check/dependency-violation";
 import {Logger} from "../common/logger";
 
 export class ResultReporter {
-    reportViolations(violations: DependencyViolation[]): string[] {
+    reportViolations(violations: DependencyViolation[]): void {
         if (violations.length === 0) {
             Logger.info('No violations found.')
             return
         }
 
-        const result: string[] = []
+        const grouped = new Map<string, string[]>()
         for (const {from, to} of violations) {
-            Logger.info(`artifact ${from.artifact} => ${to.artifact}`)
-            Logger.info(`  ${this.formatPath(from.path, from.line)} => ${this.formatPath(to.path)}`)
+            const key = `artifact ${from.artifact} => ${to.artifact || '<unknown-artifact>'}`
+
+            let existing = grouped.get(key)
+            if (!existing) {
+                existing = []
+                grouped.set(key, existing)
+            }
+
+            existing.push(`  ${this.formatPath(from.path, from.line)} => ${this.formatPath(to.path)}`)
+        }
+
+        for (const [artifact, artifactViolations] of grouped.entries()) {
+            Logger.info(artifact)
+            for (const violation of artifactViolations) {
+                Logger.info(violation)
+            }
         }
 
         Logger.info(`Found ${violations.length} violations in total`)
-
-        return result
     }
 
     private formatPath(path: string, line?: number): string {
