@@ -3,6 +3,5 @@ export interface ArtifactDescription {
     mayUseAllBelow?: true
     mayBeUsedFromAllAbove?: true
     include?: string | string[]
-    exclude?: string | string[]
     mayUse?: string | string[]
 }

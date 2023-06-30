@@ -45,19 +45,10 @@ export class Artifact {
         this.connectedTo.add(artifact.name)
 
         this.includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it))
-
-        this.excludePatterns = this.toStringArray(artifact.exclude).map(it => new PathPattern(it))
     }
 
     matches(path: string): boolean {
-        if (this.excludePatterns.some(it => it.matches(path))) {
-            return false
-        }
-
-        if (this.includePatterns.some(it => it.matches(path))) {
-            return true
-        }
-        return false
+        return this.includePatterns.some(it => it.matches(path));
     }
 
     isConnectedTo({name}: Artifact): boolean {
