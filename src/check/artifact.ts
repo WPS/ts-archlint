@@ -5,22 +5,22 @@ export class Artifact {
     readonly name: string
     private readonly connectedTo: Set<string>
     private readonly includePatterns: PathPattern[]
-    private readonly excludePatterns: PathPattern[]
+    private readonly children: Artifact[]
 
-    static createFrom(artifacts: ArtifactDescription[]): Artifact[] {
-        const result = artifacts.map(it => new Artifact(it))
+    static createFrom(descriptions: ArtifactDescription[], parentNames: string[] = []): Artifact[] {
+        const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
 
-        for (let i = 0; i < result.length; i++) {
-            if (artifacts[i].mayUseAllBelow) {
-                Artifact.applyMayUseAllBelow(i, result)
+        for (let i = 0; i < artifacts.length; i++) {
+            if (descriptions[i].mayUseAllBelow) {
+                Artifact.applyMayUseAllBelow(i, artifacts)
             }
 
-            if (artifacts[i].mayBeUsedFromAllAbove) {
-                Artifact.applyMayBeUsedFromAbove(i, result)
+            if (descriptions[i].mayBeUsedFromAllAbove) {
+                Artifact.applyMayBeUsedFromAbove(i, artifacts)
             }
         }
 
-        return result
+        return artifacts
     }
 
     private static applyMayUseAllBelow(targeIndex: number, result: Artifact[]): void {
@@ -39,16 +39,31 @@ export class Artifact {
         }
     }
 
-    private constructor(artifact: ArtifactDescription) {
-        this.name = artifact.name
-        this.connectedTo = new Set(artifact.mayUse || [])
-        this.connectedTo.add(artifact.name)
+    private constructor(description: ArtifactDescription, parentNames: string[]) {
+        this.name = this.toFullName(description.name, parentNames)
+        const mayUse = this.toStringArray(description.mayUse)
+        this.connectedTo = new Set([...mayUse, ...mayUse.map(it => this.toFullName(it, parentNames))])
+        this.connectedTo.add(this.name)
 
-        this.includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it))
+        this.includePatterns = this.toStringArray(description.include).map(it => new PathPattern(it))
+
+        this.children = Artifact.createFrom(description.children || [], [...parentNames, this.name])
     }
 
-    matches(path: string): boolean {
-        return this.includePatterns.some(it => it.matches(path));
+    private toFullName(name: string, parentNames: string[]): string {
+        return [...parentNames, name].join(".")
+    }
+
+    findMatching(path: string): Artifact[] {
+        if (!this.includePatterns.some(it => it.matches(path))) {
+            return []
+        }
+
+        const result: Artifact[] = [this]
+        for (const child of this.children) {
+            result.push(...child.findMatching(path))
+        }
+        return result
     }
 
     isConnectedTo({name}: Artifact): boolean {

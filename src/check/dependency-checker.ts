@@ -5,6 +5,7 @@ import {Artifact} from "./artifact";
 import {PathPattern} from "./path-pattern";
 import {CodeFile} from "../parse/code-file";
 import {Logger} from "../common/logger";
+import {lastOf} from "../common/util";
 
 export class DependencyChecker {
     private artifacts: Artifact[]
@@ -43,20 +44,35 @@ export class DependencyChecker {
             return undefined
         }
 
-        const from = this.findArtifact(path)
+        const from = lastOf(this.findArtifacts(path))
         if (!from) {
             Logger.debug("Not described -> OK")
             // files that are not described are not checked
             return undefined
         }
 
-        const to = this.findArtifact(dependency.path)
+        const allConnectedTo = this.findArtifacts(dependency.path).reverse()
 
-        if (to && from.isConnectedTo(to)) {
-            Logger.debug("Connected from " + from.name + " to " + to.name + " -> OK")
-            return undefined
+        if (allConnectedTo.length === 0) {
+            return this.createViolation(path, dependency, from)
         }
 
+        for (const to of allConnectedTo) {
+            if (from.isConnectedTo(to)) {
+                Logger.debug("Connected from " + from.name + " to " + to.name + " -> OK")
+                return undefined
+            }
+        }
+
+        return this.createViolation(path, dependency, from, allConnectedTo[0])
+    }
+
+    private createViolation(
+        path: string,
+        dependency: Dependency,
+        from: Artifact,
+        to?: Artifact
+    ): DependencyViolation {
         return {
             from: {
                 artifact: from.name,
@@ -70,7 +86,11 @@ export class DependencyChecker {
         }
     }
 
-    private findArtifact(path: string): Artifact | undefined {
-        return this.artifacts.find(it => it.matches(path))
+    private findArtifacts(path: string): Artifact[] {
+        const result: Artifact[] = []
+        for (const artifact of this.artifacts) {
+            result.push(...artifact.findMatching(path))
+        }
+        return result
     }
 }

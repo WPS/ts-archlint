@@ -4,4 +4,5 @@ export interface ArtifactDescription {
     mayBeUsedFromAllAbove?: true
     include?: string | string[]
     mayUse?: string | string[]
+    children?: ArtifactDescription[]
 }
