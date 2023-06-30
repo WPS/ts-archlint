@@ -23,13 +23,13 @@ describe(DependencyChecker.name, () => {
                 },
                 {
                     name: 'service',
-                    include: ['**/service/*'],
+                    include: '**/service/*',
                     mayUseAllBelow: true
                 },
                 {
                     name: 'repository',
-                    include: ['**/repository/*'],
-                    mayUse: ['entity']
+                    include: '**/repository/*',
+                    mayUse: 'entity'
                 },
                 {
                     name: 'entity',

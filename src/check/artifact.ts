@@ -44,8 +44,9 @@ export class Artifact {
         this.connectedTo = new Set(artifact.mayUse || [])
         this.connectedTo.add(artifact.name)
 
-        this.includePatterns = (artifact.include || []).map(it => new PathPattern(it))
-        this.excludePatterns = (artifact.exclude || []).map(it => new PathPattern(it))
+        this.includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it))
+
+        this.excludePatterns = this.toStringArray(artifact.exclude).map(it => new PathPattern(it))
     }
 
     matches(path: string): boolean {
@@ -65,5 +66,17 @@ export class Artifact {
 
     connectTo(artifact: Artifact): void {
         this.connectedTo.add(artifact.name)
+    }
+
+    private toStringArray(value: string | string[] | undefined): string[] {
+        if (!value) {
+            return []
+        }
+
+        if ((typeof value === 'string')) {
+            return [value]
+        } else {
+            return value
+        }
     }
 }
