@@ -50,6 +50,17 @@ describe(DependencyChecker.name, () => {
                                 include: '*/radsatz/**'
                             }
                         ]
+                    },
+                    {
+                        name: 'common',
+                        include: 'common/**',
+                        mayBeUsedFromAllAbove: true,
+                        children: [
+                            {
+                                name: 'util',
+                                include: '*/util/**'
+                            }
+                        ]
                     }
                 ]
             }
@@ -76,90 +87,130 @@ describe(DependencyChecker.name, () => {
                 dependency('lager/lieferung/bla/something.ts')
             )
             expect(violation).toBeUndefined()
+
+
+            violation = checker.check(
+                'lager/manf/foo/bar/xxx.ts',
+                dependency('common/lieferung/bla/something.ts')
+            )
+            expect(violation).toBeUndefined()
+
+
+            violation = checker.check(
+                'lager/manf/foo/bar/xxx.ts',
+                dependency('common/util/bla/something.ts')
+            )
+            expect(violation).toBeUndefined()
         })
 
-        expectViolation({
-            from: {
-                artifact: 'lager.manf',
-                path: 'lager/manf/foo/bar/blubb.ts',
-                line: 7
-            },
-            to: {
-                artifact: 'core.wagen',
-                path: 'core/wagen/something/something.ts'
-            }
-        })
+        describe('should return violation if', () => {
+            expectViolation({
+                from: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: 'core.wagen',
+                    path: 'core/wagen/something/something.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'lager.manf',
-                path: 'lager/manf/foo/bar/blubb.ts',
-                line: 7
-            },
-            to: {
-                artifact: 'core',
-                path: 'core/something/else/something/something.ts'
-            }
-        })
+            expectViolation({
+                from: {
+                    artifact: 'common.util',
+                    path: 'common/util/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: 'common',
+                    path: 'common/something/something/something.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'lager.manf',
-                path: 'lager/manf/foo/bar/blubb.ts',
-                line: 7
-            },
-            to: {
-                artifact: null,
-                path: 'what/is/this/even.ts'
-            }
-        })
+            expectViolation({
+                from: {
+                    artifact: 'common.util',
+                    path: 'common/util/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/something/something.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'lager.lieferung',
-                path: 'lager/lieferung/foo/bar/blubb.ts',
-                line: 7
-            },
-            to: {
-                artifact: 'lager.manf',
-                path: 'lager/manf/something/something.ts'
-            }
-        })
+            expectViolation({
+                from: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: 'core',
+                    path: 'core/something/else/something/something.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'core',
-                path: 'core/something/with/manf/here.ts',
-                line: 2
-            },
-            to: {
-                artifact: 'lager',
-                path: 'lager/with/something/manf/here.ts'
-            }
-        })
+            expectViolation({
+                from: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: null,
+                    path: 'what/is/this/even.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'core.wagen',
-                path: 'core/wagen/something.ts',
-                line: 2
-            },
-            to: {
-                artifact: 'lager',
-                path: 'lager/with/something/manf/here.ts'
-            }
-        })
+            expectViolation({
+                from: {
+                    artifact: 'lager.lieferung',
+                    path: 'lager/lieferung/foo/bar/blubb.ts',
+                    line: 7
+                },
+                to: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/something/something.ts'
+                }
+            })
 
-        expectViolation({
-            from: {
-                artifact: 'core.wagen',
-                path: 'core/wagen/something.ts',
-                line: 2
-            },
-            to: {
-                artifact: 'lager.manf',
-                path: 'lager/manf/something/else.ts'
-            }
+            expectViolation({
+                from: {
+                    artifact: 'core',
+                    path: 'core/something/with/manf/here.ts',
+                    line: 2
+                },
+                to: {
+                    artifact: 'lager',
+                    path: 'lager/with/something/manf/here.ts'
+                }
+            })
+
+            expectViolation({
+                from: {
+                    artifact: 'core.wagen',
+                    path: 'core/wagen/something.ts',
+                    line: 2
+                },
+                to: {
+                    artifact: 'lager',
+                    path: 'lager/with/something/manf/here.ts'
+                }
+            })
+
+            expectViolation({
+                from: {
+                    artifact: 'core.wagen',
+                    path: 'core/wagen/something.ts',
+                    line: 2
+                },
+                to: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/something/else.ts'
+                }
+            })
         })
     });
 

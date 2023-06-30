@@ -5,7 +5,7 @@ export class Artifact {
     readonly name: string
     private readonly connectedTo: Set<string>
     private readonly includePatterns: PathPattern[]
-    private readonly children: Artifact[]
+    readonly children: Artifact[]
 
     static createFrom(descriptions: ArtifactDescription[], parentNames: string[] = []): Artifact[] {
         const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
@@ -23,18 +23,18 @@ export class Artifact {
         return artifacts
     }
 
-    private static applyMayUseAllBelow(targeIndex: number, result: Artifact[]): void {
-        const target = result[targeIndex]
+    private static applyMayUseAllBelow(targetIndex: number, result: Artifact[]): void {
+        const target = result[targetIndex]
 
-        for (let i = targeIndex + 1; i < result.length; i++) {
+        for (let i = targetIndex + 1; i < result.length; i++) {
             target.connectTo(result[i])
         }
     }
 
-    private static applyMayBeUsedFromAbove(targeIndex: number, result: Artifact[]): void {
-        const target = result[targeIndex]
+    private static applyMayBeUsedFromAbove(targetIndex: number, result: Artifact[]): void {
+        const target = result[targetIndex]
 
-        for (let i = targeIndex - 1; i >= 0; i--) {
+        for (let i = targetIndex - 1; i >= 0; i--) {
             result[i].connectTo(target)
         }
     }
@@ -72,6 +72,13 @@ export class Artifact {
 
     connectTo(artifact: Artifact): void {
         this.connectedTo.add(artifact.name)
+        for (const child of artifact.children) {
+            this.connectTo(child)
+        }
+
+        for (const child of this.children) {
+            child.connectTo(artifact)
+        }
     }
 
     private toStringArray(value: string | string[] | undefined): string[] {
