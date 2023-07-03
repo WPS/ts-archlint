@@ -22,7 +22,7 @@ export class ResultReporter {
         }
 
         for (const [artifact, artifactViolations] of grouped.entries()) {
-            Logger.info(artifact)
+            Logger.info(`${artifact} (${artifactViolations.length})`)
             for (const violation of artifactViolations) {
                 Logger.info(violation)
             }
