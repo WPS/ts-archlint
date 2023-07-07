@@ -1,39 +1,39 @@
 import {Dependency} from "./dependency";
 import {CodeFile} from "./code-file";
 
-import {readdir, readFile} from 'fs/promises'
+import {readdirSync, readFileSync} from 'fs'
 import {dirname, join, relative} from 'path'
 import {Logger} from "../common/logger";
 
 const regex = /from\s*['"](.+?)['"];?/
 
-const defaultReadFile = path => readFile(path).then(it => it.toString())
+const defaultReadFile = path => readFileSync(path).toString()
 
 export class DependencyParser {
-    constructor(private rootPath: string, private read: (path: string) => Promise<string> = defaultReadFile) {
+    constructor(private rootPath: string, private read: (path: string) => string = defaultReadFile) {
     }
 
-    async parseFiles(): Promise<CodeFile[]> {
-        const result = await this.parseFilesRecursively(this.rootPath)
+    parseFiles(): CodeFile[] {
+        const result = this.parseFilesRecursively(this.rootPath)
 
         const lines = result.map(it => it.lines).reduce((a, b) => a + b, 0)
         Logger.info(`Done parsing ${result.length} files (${lines} lines total)`)
         return result
     }
 
-    private async parseFilesRecursively(directory: string): Promise<CodeFile[]> {
+    private parseFilesRecursively(directory: string): CodeFile[] {
         Logger.debug('parsing directory ' + directory)
 
         const result: CodeFile[] = []
 
-        const children = await readdir(directory, {withFileTypes: true})
+        const children = readdirSync(directory, {withFileTypes: true})
 
         for (const child of children) {
             const childPath = join(directory, child.name)
             if (child.isDirectory()) {
-                result.push(...await this.parseFilesRecursively(childPath))
+                result.push(...this.parseFilesRecursively(childPath))
             } else if (this.isSourceFile(childPath)) {
-                result.push(await this.parseFile(childPath))
+                result.push(this.parseFile(childPath))
             }
         }
 
@@ -44,8 +44,8 @@ export class DependencyParser {
         return path.endsWith('.ts')
     }
 
-    async parseFile(path: string): Promise<CodeFile> {
-        const content = await this.read(path)
+    parseFile(path: string): CodeFile {
+        const content = this.read(path)
         const [dependencies, lines] = this.parseDependencies(dirname(path), content)
 
         const codeFile: CodeFile = {

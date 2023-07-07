@@ -9,20 +9,20 @@ describe(DependencyParser.name, () => {
     beforeEach(() => {
         parser = new DependencyParser(
             '/long/path/prefix',
-            it => new Promise(resolve => {
+            it => {
                 expect(it).toBe(filePath)
-                resolve(fileContent)
-            }))
+                return fileContent
+            })
     })
 
-    it('should parse empty dependencies', async () => {
+    it('should parse empty dependencies', () => {
         fileContent = `class WithoutDependencies {
           private value = 'singleQuoted'
           private otherValue = "double quoted"
         }
         `
 
-        const dependencies = await parser.parseFile(filePath)
+        const dependencies = parser.parseFile(filePath)
         const expected: CodeFile = {
             path: 'path/to/file/file.ts',
             lines: 5,
@@ -32,7 +32,7 @@ describe(DependencyParser.name, () => {
         expect(dependencies).toEqual(expected)
     })
 
-    it('should parse existing dependencies', async () => {
+    it('should parse existing dependencies', () => {
 
         fileContent = `import {Dependency1} from "./dependency1";
         
@@ -45,7 +45,7 @@ describe(DependencyParser.name, () => {
         }
         `
 
-        const parsed = await parser.parseFile(filePath)
+        const parsed = parser.parseFile(filePath)
         const expected: CodeFile = {
             path: 'path/to/file/file.ts',
             lines: 10,
