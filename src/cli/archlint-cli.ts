@@ -11,6 +11,8 @@ import {Logger} from "../common/logger";
 
 export class ArchlintCli {
     run(): number {
+        Logger.info("Linting architecture...")
+
         let [nodePath, jsPath, archFolder] = process.argv
 
         if (!archFolder) {
