@@ -118,6 +118,18 @@ describe(DependencyChecker.name, () => {
 
             expectViolation({
                 from: {
+                    artifact: 'lager.lieferung',
+                    path: 'lager/lieferung/lieferung.ts',
+                    line: 6
+                },
+                to: {
+                    artifact: 'lager.manf',
+                    path: 'lager/manf/manf.ts'
+                }
+            })
+
+            expectViolation({
+                from: {
                     artifact: 'common.util',
                     path: 'common/util/foo/bar/blubb.ts',
                     line: 7

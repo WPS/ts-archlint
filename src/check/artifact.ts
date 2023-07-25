@@ -1,5 +1,6 @@
 import {PathPattern} from "./path-pattern";
 import {ArtifactDescription} from "../describe/artifact-description";
+import {Logger} from "../common/logger";
 
 export class Artifact {
     readonly name: string
@@ -7,7 +8,7 @@ export class Artifact {
     private readonly includePatterns: PathPattern[]
     readonly children: Artifact[]
 
-    static createFrom(descriptions: ArtifactDescription[], parentNames: string[] = []): Artifact[] {
+    static createFrom(descriptions: ArtifactDescription[], parentNames: string | null = null): Artifact[] {
         const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
 
         for (let i = 0; i < artifacts.length; i++) {
@@ -39,19 +40,21 @@ export class Artifact {
         }
     }
 
-    private constructor(description: ArtifactDescription, parentNames: string[]) {
-        this.name = this.toFullName(description.name, parentNames)
+    private constructor(description: ArtifactDescription, parentName: string | null) {
+        Logger.debug(`Creating artifact ${description.name} with parent ${parentName}`)
+
+        this.name = this.joinNames(description.name, parentName)
         const mayUse = this.toStringArray(description.mayUse)
-        this.connectedTo = new Set([...mayUse, ...mayUse.map(it => this.toFullName(it, parentNames))])
+        this.connectedTo = new Set([...mayUse, ...mayUse.map(it => this.joinNames(it, parentName))])
         this.connectedTo.add(this.name)
 
         this.includePatterns = this.toStringArray(description.include).map(it => new PathPattern(it))
 
-        this.children = Artifact.createFrom(description.children || [], [...parentNames, this.name])
+        this.children = Artifact.createFrom(description.children || [], this.name)
     }
 
-    private toFullName(name: string, parentNames: string[]): string {
-        return [...parentNames, name].join(".")
+    private joinNames(name: string, parentName: string | null): string {
+        return [parentName, name].filter(it => it).join(".")
     }
 
     findMatching(path: string): Artifact[] {
