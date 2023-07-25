@@ -11,15 +11,20 @@ import {Logger} from "../common/logger";
 
 export class ArchlintCli {
     run(): number {
-        let [nodePath, jsPath, configPath] = process.argv
+        let [nodePath, jsPath, archFolder] = process.argv
 
-        const config = this.readConfig(configPath)
+        if (!archFolder) {
+            archFolder = '.archlint'
+            Logger.info("No folder specified, using default folder " + archFolder)
+        }
+
+        const config = this.readConfig(archFolder)
         Logger.setVerbose(config.verbose || false)
 
         Logger.debug("Read the following config:", config)
 
         const checkers: DependencyChecker[] = []
-        const archFiles = this.findArchitectureFiles(config)
+        const archFiles = this.findArchitectureFiles(archFolder)
 
         const reader = new DescriptionReader()
 
@@ -49,25 +54,22 @@ export class ArchlintCli {
         return returnCode
     }
 
-    private findArchitectureFiles(config: ArchlintConfig): string[] {
-        Logger.debug("Reading folder", config.archFolder)
+    private findArchitectureFiles(archFolder: string): string[] {
+        Logger.debug("Reading folder", archFolder)
 
-        const files = readdirSync(config.archFolder)
+        const files = readdirSync(archFolder)
         Logger.debug("Found the following files:", files)
 
-        return files.filter(it => it.endsWith('.arch.json'))
-            .map(it => join(config.archFolder, it))
+        return files.filter(it => it !== 'config.json')
+            .map(it => join(archFolder, it))
     }
 
-    private readConfig(path: string): ArchlintConfig {
-        const content = readFileSync(path).toString()
-        const {archFolder, srcRoot, verbose}: ArchlintConfig = JSON.parse(content)
-
-        const configFolder = join(path, '../')
+    private readConfig(archFolder: string): ArchlintConfig {
+        const content = readFileSync(join(archFolder, 'config.json')).toString()
+        const {srcRoot, verbose}: ArchlintConfig = JSON.parse(content)
 
         return {
-            archFolder: join(configFolder, archFolder),
-            srcRoot: join(configFolder, srcRoot),
+            srcRoot: join(archFolder, srcRoot),
             verbose
         }
     }

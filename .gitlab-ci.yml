@@ -10,7 +10,7 @@ build:
     - npm install
     - npm run test:ci
     - npm run build
-    - node dist/index.js .archlint/config.json
+    - npm run archlint
   cache:
     key: archlint
     paths:
