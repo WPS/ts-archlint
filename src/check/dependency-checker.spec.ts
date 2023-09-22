@@ -69,34 +69,34 @@ describe(DependencyChecker.name, () => {
         })
 
         it('should NOT report non violating dependencies', () => {
-            violation = checker.check(
+            violation = checker.checkDependency(
                 'lager/manf/foo/bar/xxx.ts',
                 dependency('core/radsatz/bla/blubb/xxx.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 'lager/manf/foo/bar/xxx.ts',
                 dependency('core/radsatz/bla/something.ts')
             )
             expect(violation).toBeUndefined()
 
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 'lager/manf/foo/bar/xxx.ts',
                 dependency('lager/lieferung/bla/something.ts')
             )
             expect(violation).toBeUndefined()
 
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 'lager/manf/foo/bar/xxx.ts',
                 dependency('common/lieferung/bla/something.ts')
             )
             expect(violation).toBeUndefined()
 
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 'lager/manf/foo/bar/xxx.ts',
                 dependency('common/util/bla/something.ts')
             )
@@ -311,49 +311,49 @@ describe(DependencyChecker.name, () => {
         })
 
         it('should NOT report non violating dependencies', () => {
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/service/some-service.ts',
                 dependency('/some/other/prefix/domain/some-entity.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/domain/some-entity.ts',
                 dependency('/some/other/prefix/domain/another-entity.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/service/some-entity.ts',
                 dependency('/some/other/prefix/domain/a-domainvalue.dv.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/web/some-controller.ts',
                 dependency('/some/other/prefix/service/whatever.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/web/other.ts',
                 dependency('/some/other/prefix/domain/whatever.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/service/some-service.ts',
                 dependency('/some/other/prefix/repository/repo.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/thing/that/is/not/defined.ts',
                 dependency('/some/other/prefix/service/some-service.ts')
             )
             expect(violation).toBeUndefined()
 
-            violation = checker.check(
+            violation = checker.checkDependency(
                 '/some/prefix/domain/some-service.ts',
                 dependency('node_modules:some/service/some-service.ts')
             )
@@ -365,7 +365,7 @@ describe(DependencyChecker.name, () => {
         const {from, to} = expectedViolation
 
         it(`${from.artifact} accesses ${to.artifact}`, () => {
-            violation = checker.check(from.path, {line: from.line, path: to.path})
+            violation = checker.checkDependency(from.path, {line: from.line, path: to.path})
             expect(violation).toEqual(expectedViolation)
         })
     }

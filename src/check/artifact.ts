@@ -8,6 +8,8 @@ export class Artifact {
     private readonly includePatterns: PathPattern[]
     readonly children: Artifact[]
 
+    private containedFiles = new Set<string>()
+
     static createFrom(descriptions: ArtifactDescription[], parentNames: string | null = null): Artifact[] {
         const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
 
@@ -84,6 +86,10 @@ export class Artifact {
         }
     }
 
+    numberOfContainedFiles(): number {
+        return this.containedFiles.size
+    }
+
     private toStringArray(value: string | string[] | undefined): string[] {
         if (!value) {
             return []
@@ -94,5 +100,9 @@ export class Artifact {
         } else {
             return value
         }
+    }
+
+    addFile(path: string): void {
+        this.containedFiles.add(path)
     }
 }

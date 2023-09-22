@@ -23,12 +23,12 @@ export class DependencyChecker {
 
         let count = 0
         for (const file of files) {
-            for (const dependency of file.dependencies) {
-                const violation = this.check(file.path, dependency)
-                if (violation) {
-                    result.push(violation)
-                }
-                count++
+            count += this.checkFile(file, result);
+        }
+
+        for (const artifact of this.artifacts) {
+            if (artifact.numberOfContainedFiles() === 0) {
+                throw new Error(`Empty artifact: ${artifact.name}`)
             }
         }
 
@@ -36,15 +36,29 @@ export class DependencyChecker {
         return result
     }
 
-    check(path: string, dependency: Dependency): DependencyViolation | undefined {
-        Logger.debug("Checking " + path + " -> " + dependency.path)
+    private checkFile(file: CodeFile, result: DependencyViolation[]): number {
+        this.findArtifacts(file.path).forEach(it => it.addFile(file.path))
 
-        if (this.globalExcludes.some(it => it.matches(path) || it.matches(dependency.path))) {
+        let count = 0
+        for (const dependency of file.dependencies) {
+            const violation = this.checkDependency(file.path, dependency)
+            if (violation) {
+                result.push(violation)
+            }
+            count++
+        }
+        return count;
+    }
+
+    checkDependency(filePath: string, dependency: Dependency): DependencyViolation | undefined {
+        Logger.debug("Checking " + filePath + " -> " + dependency.path)
+
+        if (this.globalExcludes.some(it => it.matches(filePath) || it.matches(dependency.path))) {
             Logger.debug("Globally excluded -> OK")
             return undefined
         }
 
-        const from = lastOf(this.findArtifacts(path))
+        const from = lastOf(this.findArtifacts(filePath))
         if (!from) {
             Logger.debug("Not described -> OK")
             // files that are not described are not checked
@@ -54,7 +68,7 @@ export class DependencyChecker {
         const allConnectedTo = this.findArtifacts(dependency.path).reverse()
 
         if (allConnectedTo.length === 0) {
-            return this.createViolation(path, dependency, from)
+            return this.createViolation(filePath, dependency, from)
         }
 
         for (const to of allConnectedTo) {
@@ -64,7 +78,7 @@ export class DependencyChecker {
             }
         }
 
-        return this.createViolation(path, dependency, from, allConnectedTo[0])
+        return this.createViolation(filePath, dependency, from, allConnectedTo[0])
     }
 
     private createViolation(
