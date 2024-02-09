@@ -161,6 +161,9 @@ describe(DependencyChecker.name, () => {
 
         const violation = getViolation(fromPath, toPath);
         expect(violation).not.toBeNull()
+        if (!violation) {
+            throw new Error("The compiler does not understand otherwise")
+        }
 
         const {from, to} = violation
 
@@ -198,7 +201,7 @@ describe(DependencyChecker.name, () => {
         }
     }
 
-    function getViolation(fromPath: string, toPath: string | null): DependencyViolation | null {
+    function getViolation(fromPath: string, toPath: string): DependencyViolation | null {
         const violations = checker.checkAll([{
             path: fromPath,
             lines: 42,
