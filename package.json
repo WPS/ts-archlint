@@ -16,8 +16,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w",
-    "test": "jest --config ./jest.config.js --watchAll",
-    "test:ci": "jest --config ./jest.config.js --collectCoverage --runInBand",
+    "test": "jest --config ./jest.config.js --collectCoverage --runInBand",
+    "test:watch": "jest --config ./jest.config.js --watchAll",
     "archlint": "node dist/index.js ./src"
   },
   "license": "MIT",
