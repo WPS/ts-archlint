@@ -1,18 +1,23 @@
 import {DependencyChecker} from "./dependency-checker";
 import {ArchitectureDescription} from "../describe/architecture-description";
 import {DependencyViolation} from "./dependency-violation";
-import {Dependency} from "../parse/dependency";
+import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
 
 describe(DependencyChecker.name, () => {
     let architecture: ArchitectureDescription
+
+    let assignment: FileToArtifactAssignment
     let checker: DependencyChecker
 
-    let violation: DependencyViolation | null
+    beforeEach(() => {
+        assignment = {} as FileToArtifactAssignment
+        assignment.findArtifact = it => null
+        assignment.getUnassignedPaths = () => []
+        assignment.getEmptyArtifacts = () => []
+    })
 
     describe('with a nested architecture', function () {
         beforeEach(() => {
-            violation = null
-
             architecture = {
                 name: 'TestArchitecture',
                 exclude: ['node_modules**'],
@@ -26,19 +31,19 @@ describe(DependencyChecker.name, () => {
                                 include: '*/manf/**',
                                 mayUse: [
                                     'lieferung',
-                                    'core.radsatz'
+                                    'stammdaten.radsatz'
                                 ]
                             },
                             {
                                 name: 'lieferung',
                                 include: '*/lieferung/**',
-                                mayUse: 'core.wagen'
+                                mayUse: 'stammdaten.wagen'
                             }
                         ]
                     },
                     {
-                        name: 'core',
-                        include: 'core/**',
+                        name: 'stammdaten',
+                        include: 'stammdaten/**',
                         children: [
                             {
                                 name: 'wagen',
@@ -65,171 +70,30 @@ describe(DependencyChecker.name, () => {
                 ]
             }
 
-            checker = new DependencyChecker(architecture)
+            checker = new DependencyChecker(architecture, assignment)
         })
 
         it('should NOT report non violating dependencies', () => {
-            violation = checker.checkDependency(
-                'lager/manf/foo/bar/xxx.ts',
-                dependency('core/radsatz/bla/blubb/xxx.ts')
-            )
-            expect(violation).toBeUndefined()
-
-            violation = checker.checkDependency(
-                'lager/manf/foo/bar/xxx.ts',
-                dependency('core/radsatz/bla/something.ts')
-            )
-            expect(violation).toBeUndefined()
-
-
-            violation = checker.checkDependency(
-                'lager/manf/foo/bar/xxx.ts',
-                dependency('lager/lieferung/bla/something.ts')
-            )
-            expect(violation).toBeUndefined()
-
-
-            violation = checker.checkDependency(
-                'lager/manf/foo/bar/xxx.ts',
-                dependency('common/lieferung/bla/something.ts')
-            )
-            expect(violation).toBeUndefined()
-
-
-            violation = checker.checkDependency(
-                'lager/manf/foo/bar/xxx.ts',
-                dependency('common/util/bla/something.ts')
-            )
-            expect(violation).toBeUndefined()
+            expectNoViolation('lager.manf', 'stammdaten.radsatz')
+            expectNoViolation('lager.manf', 'lager.lieferung')
+            expectNoViolation('lager.manf', 'common.util')
+            expectNoViolation('stammdaten.wagen', 'stammdaten.radsatz')
+            expectNoViolation('stammdaten.wagen', 'common')
         })
 
-        describe('should return violation if', () => {
-            expectViolation({
-                from: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'core.wagen',
-                    path: 'core/wagen/something/something.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'lager.lieferung',
-                    path: 'lager/lieferung/lieferung.ts',
-                    line: 6
-                },
-                to: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/manf.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'common.util',
-                    path: 'common/util/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'common',
-                    path: 'common/something/something/something.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'common.util',
-                    path: 'common/util/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/something/something.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'core',
-                    path: 'core/something/else/something/something.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: null,
-                    path: 'what/is/this/even.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'lager.lieferung',
-                    path: 'lager/lieferung/foo/bar/blubb.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/something/something.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'core',
-                    path: 'core/something/with/manf/here.ts',
-                    line: 2
-                },
-                to: {
-                    artifact: 'lager',
-                    path: 'lager/with/something/manf/here.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'core.wagen',
-                    path: 'core/wagen/something.ts',
-                    line: 2
-                },
-                to: {
-                    artifact: 'lager',
-                    path: 'lager/with/something/manf/here.ts'
-                }
-            })
-
-            expectViolation({
-                from: {
-                    artifact: 'core.wagen',
-                    path: 'core/wagen/something.ts',
-                    line: 2
-                },
-                to: {
-                    artifact: 'lager.manf',
-                    path: 'lager/manf/something/else.ts'
-                }
-            })
+        it('should report violations', () => {
+            expectViolation('lager.manf', 'stammdaten.wagen')
+            expectViolation('lager.lieferung', 'lager.manf')
+            expectViolation('common.util', 'common')
+            expectViolation('lager.manf', 'stammdaten')
+            expectViolation('lager.manf', null)
+            expectViolation('stammdaten', 'lager')
+            expectViolation('stammdaten.wagen', 'lager.manf')
         })
     });
 
     describe('with a flat architecture', () => {
         beforeEach(() => {
-            violation = null
-
             architecture = {
                 name: 'TestArchitecture',
                 exclude: ['node_modules**'],
@@ -247,130 +111,106 @@ describe(DependencyChecker.name, () => {
                     {
                         name: 'repository',
                         include: '**/repository/*',
-                        mayUse: 'entity'
+                        mayUse: 'domain'
                     },
                     {
-                        name: 'entity',
+                        name: 'domain',
                         include: ['**/domain/*'],
                         mayBeUsedFromAllAbove: true
                     }
                 ]
             }
 
-            checker = new DependencyChecker(architecture)
+            checker = new DependencyChecker(architecture, assignment)
         })
 
-        describe('should report violations if:', () => {
-            expectViolation({
-                from: {
-                    artifact: 'entity',
-                    path: '/some/domain/entity.ts',
-                    line: 42
-                },
-                to: {
-                    artifact: 'repository',
-                    path: '/some/repository/repo.ts',
-                }
-            })
+        it('should report violations', () => {
+            expectViolation('controller', null)
+            expectViolation('controller', 'repository')
 
-            expectViolation({
-                from: {
-                    artifact: 'controller',
-                    path: '/some/prefix/web/some-controller.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: 'repository',
-                    path: '/blabla/other/prefix/repository/some-repository.ts'
-                }
-            })
+            expectViolation('service', 'controller')
 
-            expectViolation({
-                from: {
-                    artifact: 'controller',
-                    path: '/some/prefix/web/some-controller.ts',
-                    line: 7
-                },
-                to: {
-                    artifact: null,
-                    path: '/blabla/something/completely/different.ts'
-                }
-            })
+            expectViolation('repository', 'service')
+            expectViolation('repository', 'controller')
 
-            expectViolation({
-                from: {
-                    artifact: 'service',
-                    path: '/some/other/nested/service/mapper.ts',
-                    line: 3
-                },
-                to: {
-                    artifact: 'controller',
-                    path: '/some/deeply/nested/web/controller.ts',
-                }
-            })
+            expectViolation('domain', 'repository')
+            expectViolation('domain', 'service')
+            expectViolation('domain', 'controller')
         })
 
         it('should NOT report non violating dependencies', () => {
-            violation = checker.checkDependency(
-                '/some/prefix/service/some-service.ts',
-                dependency('/some/other/prefix/domain/some-entity.ts')
-            )
-            expect(violation).toBeUndefined()
+            expectNoViolation('controller', 'controller')
+            expectNoViolation('controller', 'service')
+            expectNoViolation('controller', 'domain')
 
-            violation = checker.checkDependency(
-                '/some/prefix/domain/some-entity.ts',
-                dependency('/some/other/prefix/domain/another-entity.ts')
-            )
-            expect(violation).toBeUndefined()
+            expectNoViolation('service', 'service')
+            expectNoViolation('service', 'repository')
+            expectNoViolation('service', 'domain')
 
-            violation = checker.checkDependency(
-                '/some/prefix/service/some-entity.ts',
-                dependency('/some/other/prefix/domain/a-domainvalue.dv.ts')
-            )
-            expect(violation).toBeUndefined()
+            expectNoViolation('repository', 'repository')
+            expectNoViolation('repository', 'domain')
 
-            violation = checker.checkDependency(
-                '/some/prefix/web/some-controller.ts',
-                dependency('/some/other/prefix/service/whatever.ts')
-            )
-            expect(violation).toBeUndefined()
-
-            violation = checker.checkDependency(
-                '/some/prefix/web/other.ts',
-                dependency('/some/other/prefix/domain/whatever.ts')
-            )
-            expect(violation).toBeUndefined()
-
-            violation = checker.checkDependency(
-                '/some/prefix/service/some-service.ts',
-                dependency('/some/other/prefix/repository/repo.ts')
-            )
-            expect(violation).toBeUndefined()
-
-            violation = checker.checkDependency(
-                '/some/thing/that/is/not/defined.ts',
-                dependency('/some/other/prefix/service/some-service.ts')
-            )
-            expect(violation).toBeUndefined()
-
-            violation = checker.checkDependency(
-                '/some/prefix/domain/some-service.ts',
-                dependency('node_modules:some/service/some-service.ts')
-            )
-            expect(violation).toBeUndefined()
+            expectNoViolation('domain', 'domain')
         })
     })
 
-    function expectViolation(expectedViolation: DependencyViolation): void {
-        const {from, to} = expectedViolation
+    function expectViolation(fromArtifact: string, toArtifact: string | null): void {
+        const fromPath = fromArtifact.split('.').join('/') + '/some/file.ts'
+        const toPath = (toArtifact ?? 'unknown.artifact').split('.').join('/') + '/other/file.ts'
 
-        it(`${from.artifact} accesses ${to.artifact}`, () => {
-            violation = checker.checkDependency(from.path, {line: from.line, path: to.path})
-            expect(violation).toEqual(expectedViolation)
-        })
+        assignment.findArtifact = it => {
+            if (it === fromPath) {
+                return fromArtifact
+            } else if (it === toPath) {
+                return toArtifact
+            } else {
+                return null
+            }
+        }
+
+        const violation = getViolation(fromPath, toPath);
+        expect(violation).not.toBeNull()
+
+        const {from, to} = violation
+
+        expect(from.line).toBe(7)
+        expect(from.path).toBe(fromPath)
+        expect(from.artifact).toBe(fromArtifact)
+
+        expect(to.path).toBe(toPath)
+        expect(to.artifact).toBe(toArtifact)
     }
 
-    function dependency(path: string): Dependency {
-        return {path, line: 4}
+    function expectNoViolation(fromArtifact: string, toArtifact: string | null): void {
+        const fromPath = '/some/arbitrary/file-path.ts'
+        const toPath = '/some/other/file-path.ts'
+
+        assignment.findArtifact = it => {
+            if (it === fromPath) {
+                return fromArtifact
+            } else if (it === toPath) {
+                return toArtifact
+            } else {
+                return null
+            }
+        }
+
+        expect(getViolation(fromPath, toPath)).toBeNull()
+    }
+
+    function getViolation(fromPath: string, toPath: string | null): DependencyViolation | null {
+        const violations = checker.checkAll([{
+            path: fromPath,
+            lines: 42,
+            dependencies: [
+                {
+                    line: 7,
+                    path: toPath
+                }
+            ]
+        }])
+
+        expect(violations.length).toBeLessThanOrEqual(1)
+        return violations[0] ?? null
     }
 });

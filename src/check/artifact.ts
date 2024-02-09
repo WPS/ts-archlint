@@ -1,14 +1,10 @@
-import {PathPattern} from "../assign/path-pattern";
 import {ArtifactDescription} from "../describe/artifact-description";
 import {Logger} from "../common/logger";
 
 export class Artifact {
     readonly name: string
     private readonly connectedTo: Set<string>
-    private readonly includePatterns: PathPattern[]
     readonly children: Artifact[]
-
-    private containedFiles = new Set<string>()
 
     static createFrom(descriptions: ArtifactDescription[], parentNames: string | null = null): Artifact[] {
         const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
@@ -50,25 +46,11 @@ export class Artifact {
         this.connectedTo = new Set([...mayUse, ...mayUse.map(it => this.joinNames(it, parentName))])
         this.connectedTo.add(this.name)
 
-        this.includePatterns = this.toStringArray(description.include).map(it => new PathPattern(it))
-
         this.children = Artifact.createFrom(description.children || [], this.name)
     }
 
     private joinNames(name: string, parentName: string | null): string {
         return [parentName, name].filter(it => it).join(".")
-    }
-
-    findMatching(path: string): Artifact[] {
-        if (!this.includePatterns.some(it => it.matches(path))) {
-            return []
-        }
-
-        const result: Artifact[] = [this]
-        for (const child of this.children) {
-            result.push(...child.findMatching(path))
-        }
-        return result
     }
 
     isConnectedTo({name}: Artifact): boolean {
@@ -86,10 +68,6 @@ export class Artifact {
         }
     }
 
-    numberOfContainedFiles(): number {
-        return this.containedFiles.size
-    }
-
     private toStringArray(value: string | string[] | undefined): string[] {
         if (!value) {
             return []
@@ -100,9 +78,5 @@ export class Artifact {
         } else {
             return value
         }
-    }
-
-    addFile(path: string): void {
-        this.containedFiles.add(path)
     }
 }

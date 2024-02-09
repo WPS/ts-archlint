@@ -47,7 +47,6 @@ export class FileToArtifactAssignment {
     private toArtifactWithInclude(artifact: ArtifactDescription, parentNames: string[]): ArtifactWithInclude {
         const names = [...parentNames, artifact.name]
 
-
         const includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it));
 
         if (includePatterns.length === 0) {
