@@ -4,6 +4,7 @@
     "node_modules**",
     "**.spec.ts"
   ],
+  "failOnUnassigned": true,
   "artifacts": [
     {
       "name": "cli",

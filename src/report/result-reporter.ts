@@ -6,21 +6,11 @@ const reportNumberOfUnassignedFiles = 15
 
 export class ResultReporter {
     reportResults(violations: DependencyViolation[], assignment: FileToArtifactAssignment): void {
-        const unassignedFiles = assignment.getUnassignedPaths();
-        if (unassignedFiles.length > 0) {
-            Logger.info(`${unassignedFiles.length} files are not part of any artifact`)
-            let count = 0
-            for (const file of unassignedFiles) {
-                count++
-                Logger.info(`  ${file}`)
+        this.reportViolations(violations);
+        this.reportUnassignedFiles(assignment);
+    }
 
-                if (count === reportNumberOfUnassignedFiles) {
-                    Logger.info("  [...]")
-                    break
-                }
-            }
-        }
-
+    private reportViolations(violations: DependencyViolation[]): void {
         if (violations.length === 0) {
             Logger.info('No violations found.')
             return
@@ -47,6 +37,23 @@ export class ResultReporter {
         }
 
         Logger.info(`Found ${violations.length} violations in total`)
+    }
+
+    private reportUnassignedFiles(assignment: FileToArtifactAssignment): void {
+        const unassignedFiles = assignment.getUnassignedPaths();
+        if (unassignedFiles.length > 0) {
+            Logger.info(`${unassignedFiles.length} files are not part of any artifact`)
+            let count = 0
+            for (const file of unassignedFiles) {
+                count++
+                Logger.info(`  ${file}`)
+
+                if (count === reportNumberOfUnassignedFiles) {
+                    Logger.info("  [...]")
+                    break
+                }
+            }
+        }
     }
 
     private formatPath(path: string, line?: number): string {

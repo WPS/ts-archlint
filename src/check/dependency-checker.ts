@@ -116,4 +116,8 @@ export class DependencyChecker {
             }
         }
     }
+
+    failedBecauseUnassigned(): boolean {
+        return this.description.failOnUnassigned && this.assignment.getUnassignedPaths().length > 0;
+    }
 }

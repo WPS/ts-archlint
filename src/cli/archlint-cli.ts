@@ -18,7 +18,7 @@ export class ArchlintCli {
 
         if (!archFolder) {
             archFolder = '.archlint'
-            Logger.info("No folder specified, using default folder " + archFolder)
+            Logger.info(`No folder specified, using default folder ${archFolder}`)
         }
 
         const config = this.readConfig(archFolder)
@@ -40,7 +40,7 @@ export class ArchlintCli {
             checkers.push(new DependencyChecker(description, assignment))
         }
 
-        Logger.debug("Read " + checkers.length + " dependency checkers")
+        Logger.debug(`Read ${checkers.length} dependency checkers`)
 
         const reporter = new ResultReporter()
 
@@ -50,11 +50,11 @@ export class ArchlintCli {
             const violations = checker.checkAll(codeFiles)
             reporter.reportResults(violations, checker.assignment)
 
-            if (violations.length > 0) {
+            if (violations.length > 0 || checker.failedBecauseUnassigned()) {
                 returnCode = 1
             }
         }
-        Logger.info("Exit code: " + returnCode)
+        Logger.info(`Exit code: ${returnCode}`)
         return returnCode
     }
 
