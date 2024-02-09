@@ -12,7 +12,6 @@ export class ResultReporter {
 
     private reportViolations(violations: DependencyViolation[]): void {
         if (violations.length === 0) {
-            Logger.info('No violations found.')
             return
         }
 
