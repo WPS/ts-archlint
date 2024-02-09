@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "archlint://archlint.schema.json",
+  "title": "Schema for Archlint Architecture descriptions",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-\\_]+$"
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "additionalItems": false
+    },
+    "failOnUnassigned": {
+      "type": "boolean"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ArtifactDescription"
+      },
+      "additionalItems": false
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "definitions": {
+    "ArtifactDescription": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9-_]+$"
+        },
+        "mayUseAllBelow": {
+          "type": "boolean"
+        },
+        "mayBeUsedFromAllAbove": {
+          "type": "boolean"
+        },
+        "include": {
+          "$ref": "#/definitions/StringOrStringArray"
+        },
+        "mayUse": {
+          "$ref": "#/definitions/StringOrStringArray"
+        },
+        "children": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "$ref": "#/definitions/ArtifactDescription"
+          }
+        },
+        "additionalProperties": false
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "ArtifactNames": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ArtifactName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ArtifactName"
+          },
+          "additionalItems": false
+        }
+      ]
+    },
+    "ArtifactName": {
+      "type": "string",
+      "pattern": "^([a-zA-Z0-9-_]+)(\\.([a-zA-Z0-9-_]+))*$"
+    },
+    "StringOrStringArray": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "additionalItems": false
+        }
+      ]
+    }
+  }
+}
