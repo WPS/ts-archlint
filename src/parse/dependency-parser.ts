@@ -7,7 +7,7 @@ import {Logger} from "../common/logger";
 
 const regex = /from\s*['"](.+?)['"];?/
 
-const defaultReadFile = path => readFileSync(path).toString()
+const defaultReadFile = (path: string) => readFileSync(path).toString()
 
 export class DependencyParser {
     constructor(private rootPath: string, private read: (path: string) => string = defaultReadFile) {

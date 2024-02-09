@@ -1,9 +1,10 @@
 interface ViolationEdge {
-    artifact: string
+    artifact: string | null
     path: string
 }
 
+
 export interface DependencyViolation {
-    from: ViolationEdge & { line: number }
-    to: ViolationEdge & { artifact: string | null }
+    from: ViolationEdge & { line: number, artifact: string }
+    to: ViolationEdge
 }

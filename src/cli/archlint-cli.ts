@@ -13,7 +13,7 @@ const archFolder = '.archlint'
 
 export class ArchlintCli {
     run(): number {
-        Logger.info("Linting architecture...")
+        Logger.info("Archlint started, linting architecture...")
 
         let [nodePath, jsPath, ...args] = process.argv
 

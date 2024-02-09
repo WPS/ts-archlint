@@ -118,6 +118,6 @@ export class DependencyChecker {
     }
 
     failedBecauseUnassigned(): boolean {
-        return this.description.failOnUnassigned && this.assignment.getUnassignedPaths().length > 0;
+        return (this.description.failOnUnassigned ?? false) && this.assignment.getUnassignedPaths().length > 0;
     }
 }

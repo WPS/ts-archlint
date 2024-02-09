@@ -26,7 +26,7 @@ export class FileToArtifactAssignment {
             // reverse sorgt dafür, dass das spezifischste zuerst kommt
             const matching = this.findMatchingArtifact(path, withIncludes)
             if (matching) {
-                this.pathToArtifactName[path] = matching.name
+                this.pathToArtifactName.set(path, matching.name)
             } else {
                 this.unassignedPaths.push(path)
             }
@@ -63,7 +63,7 @@ export class FileToArtifactAssignment {
     }
 
     findArtifact(path: string): string | null {
-        return this.pathToArtifactName[path] ?? null
+        return this.pathToArtifactName.get(path) ?? null
     }
 
     getUnassignedPaths(): string[] {
