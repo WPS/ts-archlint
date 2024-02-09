@@ -74,7 +74,7 @@ export class DependencyChecker {
             return this.createViolation(filePath, dependency, from)
         }
 
-        if (from.isConnectedTo(to)) {
+        if (from.mayUse(to)) {
             Logger.debug(`Connected from ${from.name} to ${to.name} -> OK`)
             return undefined
         }

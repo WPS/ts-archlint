@@ -3,7 +3,7 @@ import {Logger} from "../common/logger";
 
 export class Artifact {
     readonly name: string
-    private readonly connectedTo: Set<string>
+    private readonly mayUseArtifacts: string[] = []
     readonly children: Artifact[]
 
     static createFrom(descriptions: ArtifactDescription[], parentNames: string | null = null): Artifact[] {
@@ -26,7 +26,7 @@ export class Artifact {
         const target = result[targetIndex]
 
         for (let i = targetIndex + 1; i < result.length; i++) {
-            target.connectTo(result[i])
+            target.allowUsageIncludingChildren(result[i])
         }
     }
 
@@ -34,7 +34,7 @@ export class Artifact {
         const target = result[targetIndex]
 
         for (let i = targetIndex - 1; i >= 0; i--) {
-            result[i].connectTo(target)
+            result[i].allowUsageIncludingChildren(target)
         }
     }
 
@@ -43,9 +43,7 @@ export class Artifact {
 
         this.name = this.joinNames(description.name, parentName)
         const mayUse = this.toStringArray(description.mayUse)
-        this.connectedTo = new Set([...mayUse, ...mayUse.map(it => this.joinNames(it, parentName))])
-        this.connectedTo.add(this.name)
-
+        this.mayUseArtifacts.push(this.name, ...mayUse, ...mayUse.map(it => this.joinNames(it, parentName)))
         this.children = Artifact.createFrom(description.children || [], this.name)
     }
 
@@ -53,19 +51,16 @@ export class Artifact {
         return [parentName, name].filter(it => it).join(".")
     }
 
-    isConnectedTo({name}: Artifact): boolean {
-        return this.connectedTo.has(name)
+    mayUse({name}: Artifact): boolean {
+        return [...this.mayUseArtifacts].some(it => name.startsWith(it))
     }
 
-    connectTo(other: Artifact): void {
-        this.connectedTo.add(other.name)
-        for (const otherChild of other.children) {
-            this.connectTo(otherChild)
+    private allowUsageIncludingChildren(other: Artifact): void {
+        if (!this.mayUseArtifacts.includes(other.name)) {
+            this.mayUseArtifacts.push(other.name)
         }
 
-        for (const ownChild of this.children) {
-            ownChild.connectTo(other)
-        }
+        this.children.forEach(it => it.allowUsageIncludingChildren(other))
     }
 
     private toStringArray(value: string | string[] | undefined): string[] {

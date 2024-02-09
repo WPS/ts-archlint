@@ -31,7 +31,7 @@ describe(DependencyChecker.name, () => {
                                 include: '*/manf/**',
                                 mayUse: [
                                     'lieferung',
-                                    'stammdaten.radsatz'
+                                    'stammdaten'
                                 ]
                             },
                             {
@@ -74,18 +74,20 @@ describe(DependencyChecker.name, () => {
         })
 
         it('should NOT report non violating dependencies', () => {
+            expectNoViolation('lager.manf', 'stammdaten')
             expectNoViolation('lager.manf', 'stammdaten.radsatz')
+            expectNoViolation('lager.manf', 'stammdaten.wagen')
             expectNoViolation('lager.manf', 'lager.lieferung')
             expectNoViolation('lager.manf', 'common.util')
             expectNoViolation('stammdaten.wagen', 'stammdaten.radsatz')
             expectNoViolation('stammdaten.wagen', 'common')
+            expectNoViolation('lager.lieferung', 'stammdaten.wagen')
         })
 
         it('should report violations', () => {
-            expectViolation('lager.manf', 'stammdaten.wagen')
             expectViolation('lager.lieferung', 'lager.manf')
+            expectViolation('lager.lieferung', 'stammdaten.radsatz')
             expectViolation('common.util', 'common')
-            expectViolation('lager.manf', 'stammdaten')
             expectViolation('lager.manf', null)
             expectViolation('stammdaten', 'lager')
             expectViolation('stammdaten.wagen', 'lager.manf')
@@ -155,18 +157,7 @@ describe(DependencyChecker.name, () => {
     })
 
     function expectViolation(fromArtifact: string, toArtifact: string | null): void {
-        const fromPath = fromArtifact.split('.').join('/') + '/some/file.ts'
-        const toPath = (toArtifact ?? 'unknown.artifact').split('.').join('/') + '/other/file.ts'
-
-        assignment.findArtifact = it => {
-            if (it === fromPath) {
-                return fromArtifact
-            } else if (it === toPath) {
-                return toArtifact
-            } else {
-                return null
-            }
-        }
+        const {fromPath, toPath} = setupFromAndToPath(fromArtifact, toArtifact)
 
         const violation = getViolation(fromPath, toPath);
         expect(violation).not.toBeNull()
@@ -182,8 +173,14 @@ describe(DependencyChecker.name, () => {
     }
 
     function expectNoViolation(fromArtifact: string, toArtifact: string | null): void {
-        const fromPath = '/some/arbitrary/file-path.ts'
-        const toPath = '/some/other/file-path.ts'
+        const {fromPath, toPath} = setupFromAndToPath(fromArtifact, toArtifact)
+
+        expect(getViolation(fromPath, toPath)).toBeNull()
+    }
+
+    function setupFromAndToPath(fromArtifact: string, toArtifact: string | null): { fromPath: string, toPath: string } {
+        const fromPath = fromArtifact.split('.').join('/') + '/some/file.ts';
+        const toPath = (toArtifact ?? 'unknown.artifact').split('.').join('/') + '/other/file.ts'
 
         assignment.findArtifact = it => {
             if (it === fromPath) {
@@ -195,7 +192,10 @@ describe(DependencyChecker.name, () => {
             }
         }
 
-        expect(getViolation(fromPath, toPath)).toBeNull()
+        return {
+            fromPath,
+            toPath
+        }
     }
 
     function getViolation(fromPath: string, toPath: string | null): DependencyViolation | null {

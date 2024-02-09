@@ -2,6 +2,32 @@ import {Artifact} from "./artifact";
 import {ArtifactDescription} from "../describe/artifact-description";
 
 describe(Artifact.name, () => {
+    it('should setup mayUse for children', () => {
+        const descriptions: ArtifactDescription[] = [
+            {
+                name: 'parent1',
+                mayUse: 'parent2'
+            },
+            {
+                name: 'parent2',
+                children: [
+                    {name: 'child1'}
+                ]
+            }
+        ]
+
+        const [parent1, parent2] = Artifact.createFrom(descriptions)
+        const child1 = parent2.children[0];
+
+        expect(parent1.name).toBe('parent1')
+
+        expect(parent2.name).toBe('parent2')
+        expect(child1.name).toBe('parent2.child1')
+
+        expect(parent1.mayUse(parent2)).toBe(true)
+        expect(parent1.mayUse(child1)).toBe(true)
+    })
+
     it('should name correctly from nested description', () => {
         const description: ArtifactDescription = {
             name: 'one',
