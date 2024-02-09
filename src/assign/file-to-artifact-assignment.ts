@@ -1,6 +1,7 @@
 import {ArtifactDescription} from "../describe/artifact-description";
 import {PathPattern} from "./path-pattern";
 import {CodeFile} from "../parse/code-file";
+import {ArchitectureDescription} from "../describe/architecture-description";
 
 interface ArtifactWithInclude {
     name: string
@@ -15,14 +16,18 @@ export class FileToArtifactAssignment {
     private unassignedPaths: string[] = []
     private emptyArtifacts: string[] = []
 
-    static createFrom(artifacts: ArtifactDescription[], files: CodeFile[]): FileToArtifactAssignment {
-        return new FileToArtifactAssignment(artifacts, files)
+    static createFrom(description: ArchitectureDescription, files: CodeFile[]): FileToArtifactAssignment {
+        return new FileToArtifactAssignment(description, files)
     }
 
-    private constructor(artifacts: ArtifactDescription[], files: CodeFile[]) {
-        const withIncludes = artifacts.map(it => this.toArtifactWithInclude(it, []))
+    private constructor(description: ArchitectureDescription, files: CodeFile[]) {
+        const withIncludes = description.artifacts.map(it => this.toArtifactWithInclude(it, []))
 
-        for (const {path} of files) {
+        const globalExcludes = (description.exclude ?? []).map(it => new PathPattern(it))
+
+        const keepFile = (file: CodeFile) => !globalExcludes.some(it => it.matches(file.path))
+
+        for (const {path} of files.filter(keepFile)) {
             // reverse sorgt dafür, dass das spezifischste zuerst kommt
             const matching = this.findMatchingArtifact(path, withIncludes)
             if (matching) {

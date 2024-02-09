@@ -22,7 +22,7 @@ describe(DependencyParser.name, () => {
         }
         `
 
-        const dependencies = parser.parseFile(filePath)
+        const dependencies = parser.parseTypescriptFile(filePath)
         const expected: CodeFile = {
             path: 'path/to/file/file.ts',
             lines: 5,
@@ -45,7 +45,7 @@ describe(DependencyParser.name, () => {
         }
         `
 
-        const parsed = parser.parseFile(filePath)
+        const parsed = parser.parseTypescriptFile(filePath)
         const expected: CodeFile = {
             path: 'path/to/file/file.ts',
             lines: 10,
@@ -63,6 +63,20 @@ describe(DependencyParser.name, () => {
                     path: 'node_modules:external-lib'
                 }
             ]
+        }
+
+        expect(parsed).toEqual(expected)
+    })
+
+    it('should NOT parse dependencies to JSON files', () => {
+
+        fileContent = `import blubb from "./dependency1.json";`
+        const parsed = parser.parseTypescriptFile(filePath)
+
+        const expected: CodeFile = {
+            path: 'path/to/file/file.ts',
+            lines: 1,
+            dependencies: []
         }
 
         expect(parsed).toEqual(expected)

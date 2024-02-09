@@ -1,21 +1,17 @@
 import {ArchitectureDescription} from "./architecture-description";
 
+import schema from '../schema.json'
+import {Validator} from "jsonschema";
+
 export class DescriptionReader {
-
     readDescription(fileContent: string): ArchitectureDescription {
-        const description: Partial<ArchitectureDescription> & unknown = JSON.parse(fileContent)
-        if (!description.name) {
-            throw new Error("name is required!")
+        const description: ArchitectureDescription = JSON.parse(fileContent)
+        const validationResult = new Validator().validate(description, schema as any)
+
+        if (!validationResult.valid) {
+            throw new Error(validationResult.toString())
         }
 
-        if (!description.artifacts) {
-            throw new Error("artifacts are required")
-        }
-
-        return {
-            name: description.name,
-            artifacts: description.artifacts,
-            ...description
-        }
+        return description
     }
 }

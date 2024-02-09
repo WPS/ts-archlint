@@ -32,19 +32,15 @@ export class DependencyParser {
             const childPath = join(directory, child.name)
             if (child.isDirectory()) {
                 result.push(...this.parseFilesRecursively(childPath))
-            } else if (this.isSourceFile(childPath)) {
-                result.push(this.parseFile(childPath))
+            } else if (childPath.endsWith('.ts')) {
+                result.push(this.parseTypescriptFile(childPath))
             }
         }
 
         return result
     }
 
-    private isSourceFile(path: string): boolean {
-        return path.endsWith('.ts')
-    }
-
-    parseFile(path: string): CodeFile {
+    parseTypescriptFile(path: string): CodeFile {
         const content = this.read(path)
         const [dependencies, lines] = this.parseDependencies(dirname(path), content)
 
@@ -69,6 +65,10 @@ export class DependencyParser {
             if (match) {
                 const [_, path] = match
 
+                if (path.endsWith('.json')) {
+                    continue
+                }
+
                 result.push({
                     line: lineNumber,
                     path: this.normalizePath(sourcePath, path)
@@ -89,8 +89,9 @@ export class DependencyParser {
         const absolute = join(sourcePath, path)
         const withoutPrefix = relative(this.rootPath, absolute)
 
-        return this.toForwardSlashes(withoutPrefix) + '.ts'
+        const fullPath = this.toForwardSlashes(withoutPrefix);
 
+        return fullPath + '.ts'
     }
 
     private toForwardSlashes(path: string): string {

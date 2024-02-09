@@ -32,7 +32,7 @@ export class ArchlintCli {
         for (const archFile of archFiles) {
             const fileContent = readFileSync(archFile).toString()
             const description: ArchitectureDescription = reader.readDescription(fileContent)
-            const assignment = FileToArtifactAssignment.createFrom(description.artifacts, codeFiles)
+            const assignment = FileToArtifactAssignment.createFrom(description, codeFiles)
             checkers.push(new DependencyChecker(description, assignment))
         }
 

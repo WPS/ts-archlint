@@ -1,5 +1,5 @@
 {
-  "$schema": "../doc/schema.json",
+  "$schema": "../src/schema.json",
   "name": "domain-layers",
   "exclude": [
     "node_modules**",
