@@ -1,4 +1,4 @@
-import {PathPattern} from "./path-pattern";
+import {PathPattern} from "../assign/path-pattern";
 import {ArtifactDescription} from "../describe/artifact-description";
 import {Logger} from "../common/logger";
 
@@ -75,14 +75,14 @@ export class Artifact {
         return this.connectedTo.has(name)
     }
 
-    connectTo(artifact: Artifact): void {
-        this.connectedTo.add(artifact.name)
-        for (const child of artifact.children) {
-            this.connectTo(child)
+    connectTo(other: Artifact): void {
+        this.connectedTo.add(other.name)
+        for (const otherChild of other.children) {
+            this.connectTo(otherChild)
         }
 
-        for (const child of this.children) {
-            child.connectTo(artifact)
+        for (const ownChild of this.children) {
+            ownChild.connectTo(other)
         }
     }
 

@@ -2,7 +2,7 @@ import {DependencyViolation} from "./dependency-violation";
 import {ArchitectureDescription} from "../describe/architecture-description";
 import {Dependency} from "../parse/dependency";
 import {Artifact} from "./artifact";
-import {PathPattern} from "./path-pattern";
+import {PathPattern} from "../assign/path-pattern";
 import {CodeFile} from "../parse/code-file";
 import {Logger} from "../common/logger";
 import {lastOf} from "../common/util";

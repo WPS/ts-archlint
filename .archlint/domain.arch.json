@@ -28,6 +28,17 @@
       ],
       "mayUse": [
         "describe",
+        "assign",
+        "parse"
+      ]
+    },
+    {
+      "name": "assign",
+      "include": [
+        "assign/**"
+      ],
+      "mayUse": [
+        "describe",
         "parse"
       ]
     },
