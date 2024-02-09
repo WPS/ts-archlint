@@ -1,9 +1,9 @@
 import {FileToArtifactAssignment} from "./file-to-artifact-assignment";
 import {ArtifactDescription} from "../describe/artifact-description";
+import {CodeFile} from "../parse/code-file";
 
 describe(FileToArtifactAssignment.name, () => {
     let artifacts: ArtifactDescription[]
-    let assignment: FileToArtifactAssignment
 
     beforeEach(() => {
         artifacts = [
@@ -52,7 +52,7 @@ describe(FileToArtifactAssignment.name, () => {
 
             'three/child1/file.ts',
             'three/child2/file.ts'
-        ]
+        ].map(path => ({path} as CodeFile))
 
         const assignment = FileToArtifactAssignment.createFrom(artifacts, files)
 

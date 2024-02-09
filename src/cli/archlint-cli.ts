@@ -7,6 +7,7 @@ import {DescriptionReader} from "../describe/description-reader";
 import {ArchitectureDescription} from "../describe/architecture-description";
 import {ArchlintConfig} from "../describe/archlint-config";
 import {Logger} from "../common/logger";
+import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
 
 
 export class ArchlintCli {
@@ -30,23 +31,24 @@ export class ArchlintCli {
 
         const reader = new DescriptionReader()
 
+        const codeFiles = new DependencyParser(config.srcRoot).parseFiles()
+
         for (const archFile of archFiles) {
             const fileContent = readFileSync(archFile).toString()
             const description: ArchitectureDescription = reader.readDesription(fileContent)
-            checkers.push(new DependencyChecker(description))
+            const assignment = FileToArtifactAssignment.createFrom(description.artifacts, codeFiles)
+            checkers.push(new DependencyChecker(description, assignment))
         }
 
         Logger.debug("Read " + checkers.length + " dependency checkers")
-
-        const parsed = new DependencyParser(config.srcRoot).parseFiles()
 
         const reporter = new ResultReporter()
 
         let returnCode = 0
 
         for (const checker of checkers) {
-            const violations = checker.checkAll(parsed)
-            reporter.reportViolations(violations)
+            const violations = checker.checkAll(codeFiles)
+            reporter.reportResults(violations, checker.assignment)
 
             if (violations.length > 0) {
                 returnCode = 1

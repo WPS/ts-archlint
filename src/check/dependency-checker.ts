@@ -11,7 +11,7 @@ export class DependencyChecker {
     private readonly artifactsByNames = new Map<string, Artifact>()
     private globalExcludes: PathPattern[]
 
-    constructor(private description: ArchitectureDescription, private assignment: FileToArtifactAssignment) {
+    constructor(private description: ArchitectureDescription, readonly assignment: FileToArtifactAssignment) {
         Artifact.createFrom(description.artifacts).forEach(it => this.addArtifact(it))
         this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
     }

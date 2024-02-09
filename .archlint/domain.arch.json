@@ -8,7 +8,8 @@
     {
       "name": "cli",
       "include": [
-        "cli/**"
+        "cli/**",
+        "index.ts"
       ],
       "mayUseAllBelow": true
     },
@@ -18,7 +19,8 @@
         "report/**"
       ],
       "mayUse": [
-        "check"
+        "check",
+        "assign"
       ]
     },
     {

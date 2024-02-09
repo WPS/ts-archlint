@@ -1,8 +1,26 @@
 import {DependencyViolation} from "../check/dependency-violation";
 import {Logger} from "../common/logger";
+import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
+
+const reportNumberOfUnassignedFiles = 15
 
 export class ResultReporter {
-    reportViolations(violations: DependencyViolation[]): void {
+    reportResults(violations: DependencyViolation[], assignment: FileToArtifactAssignment): void {
+        const unassignedFiles = assignment.getUnassignedPaths();
+        if (unassignedFiles.length > 0) {
+            Logger.info(`${unassignedFiles.length} files are not part of any artifact`)
+            let count = 0
+            for (const file of unassignedFiles) {
+                count++
+                Logger.info(`  ${file}`)
+
+                if (count === reportNumberOfUnassignedFiles) {
+                    Logger.info("  [...]")
+                    break
+                }
+            }
+        }
+
         if (violations.length === 0) {
             Logger.info('No violations found.')
             return
