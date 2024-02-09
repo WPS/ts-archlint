@@ -31,7 +31,8 @@
   },
   "additionalProperties": false,
   "required": [
-    "name"
+    "name",
+    "artifacts"
   ],
   "definitions": {
     "ArtifactDescription": {

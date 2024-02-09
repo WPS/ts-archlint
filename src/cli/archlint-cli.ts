@@ -9,25 +9,21 @@ import {ArchlintConfig} from "../describe/archlint-config";
 import {Logger} from "../common/logger";
 import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
 
+const archFolder = '.archlint'
 
 export class ArchlintCli {
     run(): number {
         Logger.info("Linting architecture...")
 
-        let [nodePath, jsPath, archFolder] = process.argv
+        let [nodePath, jsPath, ...args] = process.argv
 
-        if (!archFolder) {
-            archFolder = '.archlint'
-            Logger.info(`No folder specified, using default folder ${archFolder}`)
-        }
-
-        const config = this.readConfig(archFolder)
+        const config = this.readConfig(args)
         Logger.setVerbose(config.verbose || false)
 
         Logger.debug("Read the following config:", config)
 
         const checkers: DependencyChecker[] = []
-        const archFiles = this.findArchitectureFiles(archFolder)
+        const archFiles = this.findArchitectureFiles()
 
         const reader = new DescriptionReader()
 
@@ -35,7 +31,7 @@ export class ArchlintCli {
 
         for (const archFile of archFiles) {
             const fileContent = readFileSync(archFile).toString()
-            const description: ArchitectureDescription = reader.readDesription(fileContent)
+            const description: ArchitectureDescription = reader.readDescription(fileContent)
             const assignment = FileToArtifactAssignment.createFrom(description.artifacts, codeFiles)
             checkers.push(new DependencyChecker(description, assignment))
         }
@@ -58,22 +54,34 @@ export class ArchlintCli {
         return returnCode
     }
 
-    private findArchitectureFiles(archFolder: string): string[] {
+    private findArchitectureFiles(): string[] {
         Logger.debug("Reading folder", archFolder)
 
         const files = readdirSync(archFolder)
         Logger.debug("Found the following files:", files)
 
-        return files.filter(it => it !== 'config.json')
-            .map(it => join(archFolder, it))
+        return files.map(it => join(archFolder, it))
     }
 
-    private readConfig(archFolder: string): ArchlintConfig {
-        const content = readFileSync(join(archFolder, 'config.json')).toString()
-        const {srcRoot, verbose}: ArchlintConfig = JSON.parse(content)
+    private readConfig(args: string[]): ArchlintConfig {
+        let [srcRoot, verboseString, ...others] = args
+        if (!srcRoot) {
+            throw new Error("You need to pass the source-root as first argument")
+        }
+
+        if (others.length > 0) {
+            throw new Error("Unexpected number of arguments")
+        }
+
+        let verbose = false
+        if (verboseString === '-v' || verboseString === '--verbose') {
+            verbose = true
+        } else if (verboseString) {
+            throw new Error(`Unexpected parameter: '${verboseString}'`)
+        }
 
         return {
-            srcRoot: join(archFolder, srcRoot),
+            srcRoot,
             verbose
         }
     }

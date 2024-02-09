@@ -18,7 +18,7 @@
     "start": "npm run build -- --watch",
     "test": "jest --config ./jest.config.js --watchAll",
     "test:ci": "jest --config ./jest.config.js --collectCoverage --runInBand",
-    "archlint": "node dist/index.js"
+    "archlint": "node dist/index.js ./src"
   },
   "license": "MIT",
   "devDependencies": {

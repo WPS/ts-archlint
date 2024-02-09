@@ -2,7 +2,7 @@ import {ArchitectureDescription} from "./architecture-description";
 
 export class DescriptionReader {
 
-    readDesription(fileContent: string): ArchitectureDescription {
+    readDescription(fileContent: string): ArchitectureDescription {
         const description: Partial<ArchitectureDescription> & unknown = JSON.parse(fileContent)
         if (!description.name) {
             throw new Error("name is required!")
