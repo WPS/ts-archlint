@@ -51,10 +51,17 @@ describe(FileToArtifactAssignment.name, () => {
             'one/child2/grandchild1/file.ts',
 
             'three/child1/file.ts',
-            'three/child2/file.ts'
+            'three/child2/file.ts',
+            'four/child3/file.ts'
         ].map(path => ({path} as CodeFile))
 
-        const assignment = FileToArtifactAssignment.createFrom(artifacts, files)
+        const assignment = FileToArtifactAssignment.createFrom({
+            name: 'test',
+            exclude: [
+                '**four**'
+            ],
+            artifacts,
+        }, files)
 
         expect(assignment.findArtifact('one/file/inside.ts')).toEqual('one')
         expect(assignment.findArtifact('two/files/inside.ts')).toEqual('two')

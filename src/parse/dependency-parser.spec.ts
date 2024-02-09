@@ -70,7 +70,8 @@ describe(DependencyParser.name, () => {
 
     it('should NOT parse dependencies to JSON files', () => {
 
-        fileContent = `import blubb from "./dependency1.json";`
+        fileContent = `import blubb from "./dependency1.json";
+        `
         const parsed = parser.parseTypescriptFile(filePath)
 
         const expected: CodeFile = {
