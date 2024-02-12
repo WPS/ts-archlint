@@ -60,9 +60,9 @@
           "items": {
             "$ref": "#/definitions/ArtifactDescription"
           }
-        },
-        "additionalProperties": false
+        }
       },
+      "additionalProperties": false,
       "required": [
         "name"
       ]
