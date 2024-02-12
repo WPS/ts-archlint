@@ -15,7 +15,7 @@ Simple linter for enforcing architecture rules in typescript.
 
 ```json
 {
-  "$schema": "../node_modules/ts-archlint/schema.json",
+  "$schema": "../node_modules/ts-archlint/dist/schema.json",
   "name": "technical-layers",
   "failOnUnassigned": true,
   "exclude": [
