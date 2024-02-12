@@ -22,7 +22,7 @@ export class DependencyParser {
     }
 
     private parseFilesRecursively(directory: string): CodeFile[] {
-        Logger.debug('parsing directory ' + directory)
+        Logger.debug(`parsing directory ${directory}`)
 
         const result: CodeFile[] = []
 

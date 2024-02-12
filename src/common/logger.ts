@@ -25,6 +25,6 @@ export class Logger {
             paramsString = JSON.stringify(params)
         }
 
-        console.log(message + " " + paramsString)
+        console.log(`${message} ${paramsString}`)
     }
 }
