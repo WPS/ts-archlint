@@ -82,4 +82,30 @@ describe(DependencyParser.name, () => {
 
         expect(parsed).toEqual(expected)
     })
+
+    it('should parse dependencies of lazy loaded Routes in Angular', () => {
+        fileContent = `
+        const routes: Routes = [
+           {
+              path: 'whatever', 
+              loadChildren: () => import('../lazy.component').then(it => it.LazyComponent)
+           }
+        ]
+        `
+
+        const parsed = parser.parseTypescriptFile(filePath)
+
+        const expected: CodeFile = {
+            path: 'path/to/file/file.ts',
+            lines: 8,
+            dependencies: [
+                {
+                    line: 5,
+                    path: 'path/to/lazy.component.ts',
+                }
+            ]
+        }
+
+        expect(parsed).toEqual(expected)
+    })
 });

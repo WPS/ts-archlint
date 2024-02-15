@@ -5,7 +5,8 @@ import {readdirSync, readFileSync} from 'fs'
 import {dirname, join, relative} from 'path'
 import {Logger} from "../common/logger";
 
-const regex = /from\s*['"](.+?)['"];?/
+const regexFromImport = /from\s*['"](.+?)['"];?/
+const regexLazyImport = /import\(['"](.+?)['"]\)/
 
 const defaultReadFile = (path: string) => readFileSync(path).toString()
 
@@ -60,7 +61,7 @@ export class DependencyParser {
         const lines = fileContent.split(/\r?\n/)
         let lineNumber = 1
         for (const line of lines) {
-            const match = regex.exec(line)
+            const match = regexFromImport.exec(line) ?? regexLazyImport.exec(line)
 
             if (match) {
                 const [_, path] = match
