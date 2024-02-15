@@ -24,7 +24,7 @@ build:
 publish:
   stage: publish
   only:
-    - tags
+    - never
   script:
     - sed -i "s/0.0.0-SNAPSHOT/$CI_COMMIT_TAG/" package.json
     - npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
