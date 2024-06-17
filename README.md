@@ -7,7 +7,7 @@ Simple linter for enforcing architecture rules in typescript.
 - Install via `npm install --save-dev ts-archlint`
 - Create a folder `.archlint` to store the JSON-description(s) of the architecture
 - Create the JSON-descriptions in this folder (see below)
-- Run via `node ./node_modules/ts-archlint/dist/index.js`
+- Run via `node ./node_modules/ts-archlint/dist/index.js ./src/app`
 
 ## File structure
 
