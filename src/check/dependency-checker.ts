@@ -11,10 +11,12 @@ import {CheckResult} from "./check-result";
 export class DependencyChecker {
     private readonly artifactsByNames = new Map<string, Artifact>()
     private globalExcludes: PathPattern[]
+    private globalIncludes: PathPattern[]
 
     constructor(private description: ArchitectureDescription, private assignment: FileToArtifactAssignment) {
         Artifact.createFrom(description.artifacts).forEach(it => this.addArtifact(it))
-        this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
+        this.globalExcludes = (description.exclude ?? []).map(it => new PathPattern(it))
+        this.globalIncludes = (description.include ?? []).map(it => new PathPattern(it))
     }
 
     private addArtifact(artifact: Artifact): void {
@@ -59,6 +61,13 @@ export class DependencyChecker {
 
     checkDependency(filePath: string, dependency: Dependency): DependencyViolation | undefined {
         Logger.debug("Checking " + filePath + " -> " + dependency.path)
+
+        if (this.globalIncludes.length > 0) {
+            if (this.globalIncludes.every(it => !it.matches(filePath) || !it.matches(dependency.path))) {
+                Logger.debug("Not globally included -> OK")
+                return undefined
+            }
+        }
 
         if (this.globalExcludes.some(it => it.matches(filePath) || it.matches(dependency.path))) {
             Logger.debug("Globally excluded -> OK")

@@ -156,6 +156,53 @@ describe(DependencyChecker.name, () => {
         })
     })
 
+    describe('with an architecture with includes', () => {
+        beforeEach(() => {
+            architecture = {
+                name: 'with-includes',
+                include: [
+                    'projects/included/**'
+                ],
+                exclude: [
+                    'projects/included/exception/**'
+                ],
+                artifacts: [
+                    {
+                        name: 'one',
+                        include: '**/one/**',
+                        mayUse: 'two'
+                    },
+                    {
+                        name: 'two',
+                        include: '**/two/**',
+                    },
+                    {
+                        name: 'three',
+                        include: '**/three/**'
+                    }
+                ]
+            }
+
+            assignment.findArtifact = findArtifactsByInclude(['one', 'two', 'three'])
+
+            checker = new DependencyChecker(architecture, assignment)
+        })
+
+        it('should return violations correctly', () => {
+            expect(getViolation('projects/included/one/file.ts', 'projects/included/two/file.ts')).toBeNull()
+            expect(getViolation('projects/included/two/file.ts', 'projects/included/one/file.ts')).not.toBeNull()
+
+            expect(getViolation('projects/included/one/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
+            expect(getViolation('projects/included/two/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
+
+            expect(getViolation('projects/included/one/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
+            expect(getViolation('projects/included/two/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
+
+            expect(getViolation('projects/included/one/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
+            expect(getViolation('projects/included/two/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
+        })
+    });
+
     function expectViolation(fromArtifact: string, toArtifact: string | null): void {
         const {fromPath, toPath} = setupFromAndToPath(fromArtifact, toArtifact)
 
@@ -198,6 +245,17 @@ describe(DependencyChecker.name, () => {
         return {
             fromPath,
             toPath
+        }
+    }
+
+    function findArtifactsByInclude(artifacts: string[]): (it: string) => string | null {
+        return path => {
+            for (const artifact of artifacts) {
+                if (path.includes('/' + artifact + '/')) {
+                    return artifact
+                }
+            }
+            return null
         }
     }
 

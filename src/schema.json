@@ -11,6 +11,13 @@
       "type": "string",
       "pattern": "^[a-zA-Z0-9-_]+$"
     },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "additionalItems": false
+    },
     "exclude": {
       "type": "array",
       "items": {
