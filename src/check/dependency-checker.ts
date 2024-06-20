@@ -6,12 +6,13 @@ import {PathPattern} from "../assign/path-pattern";
 import {CodeFile} from "../parse/code-file";
 import {Logger} from "../common/logger";
 import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
+import {CheckResult} from "./check-result";
 
 export class DependencyChecker {
     private readonly artifactsByNames = new Map<string, Artifact>()
     private globalExcludes: PathPattern[]
 
-    constructor(private description: ArchitectureDescription, readonly assignment: FileToArtifactAssignment) {
+    constructor(private description: ArchitectureDescription, private assignment: FileToArtifactAssignment) {
         Artifact.createFrom(description.artifacts).forEach(it => this.addArtifact(it))
         this.globalExcludes = (description.exclude || []).map(it => new PathPattern(it))
     }
@@ -23,22 +24,25 @@ export class DependencyChecker {
         }
     }
 
-    checkAll(files: CodeFile[]): DependencyViolation[] {
-        Logger.info(`Checking dependencies against rule ${this.description.name}`)
-
+    checkAll(files: CodeFile[]): CheckResult {
         if (this.assignment.getEmptyArtifacts().length > 0) {
-            throw new Error(`Empty artifacts: ${this.assignment.getEmptyArtifacts().join(', ')}`)
+            throw `Empty artifacts: ${this.assignment.getEmptyArtifacts().join(', ')}`
         }
 
-        const result: DependencyViolation[] = []
+        const violations: DependencyViolation[] = []
 
-        let count = 0
+        let dependencies = 0
         for (const file of files) {
-            count += this.checkFile(file, result);
+            dependencies += this.checkFile(file, violations);
         }
 
-        Logger.info(`Analyzed ${count} dependencies, found ${result.length} violations`)
-        return result
+        return {
+            architectureName: this.description.name,
+            violations,
+            dependencies,
+            assignment: this.assignment,
+            failedBecauseUnassigned: this.failedBecauseUnassigned()
+        }
     }
 
     private checkFile(file: CodeFile, result: DependencyViolation[]): number {
@@ -117,7 +121,7 @@ export class DependencyChecker {
         }
     }
 
-    failedBecauseUnassigned(): boolean {
+    private failedBecauseUnassigned(): boolean {
         return (this.description.failOnUnassigned ?? false) && this.assignment.getUnassignedPaths().length > 0;
     }
 }

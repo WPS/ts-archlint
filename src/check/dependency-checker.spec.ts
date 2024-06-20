@@ -202,7 +202,7 @@ describe(DependencyChecker.name, () => {
     }
 
     function getViolation(fromPath: string, toPath: string): DependencyViolation | null {
-        const violations = checker.checkAll([{
+        const result = checker.checkAll([{
             path: fromPath,
             lines: 42,
             dependencies: [
@@ -213,7 +213,7 @@ describe(DependencyChecker.name, () => {
             ]
         }])
 
-        expect(violations.length).toBeLessThanOrEqual(1)
-        return violations[0] ?? null
+        expect(result.violations.length).toBeLessThanOrEqual(1)
+        return result.violations[0] ?? null
     }
 });

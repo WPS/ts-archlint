@@ -43,10 +43,10 @@ export class ArchlintCli {
         let returnCode = 0
 
         for (const checker of checkers) {
-            const violations = checker.checkAll(codeFiles)
-            reporter.reportResults(violations, checker.assignment)
+            const result = checker.checkAll(codeFiles)
+            reporter.reportResults(result)
 
-            if (violations.length > 0 || checker.failedBecauseUnassigned()) {
+            if (result.violations.length > 0 || result.failedBecauseUnassigned) {
                 returnCode = 1
             }
         }
