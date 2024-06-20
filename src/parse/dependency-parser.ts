@@ -7,6 +7,7 @@ import {Logger} from "../common/logger";
 
 const regexFromImport = /from\s*['"](.+?)['"];?/
 const regexLazyImport = /import\(['"](.+?)['"]\)/
+const regexComment = RegExp("^\\s*//.*")
 
 const defaultReadFile = (path: string) => readFileSync(path).toString()
 
@@ -59,11 +60,13 @@ export class DependencyParser {
         const result: Dependency[] = []
 
         const lines = fileContent.split(/\r?\n/)
-        let lineNumber = 1
+        let lineNumber = 0
         for (const line of lines) {
+            lineNumber++
+
             const match = regexFromImport.exec(line) ?? regexLazyImport.exec(line)
 
-            if (match) {
+            if (match && !regexComment.exec(line)) {
                 const [_, path] = match
 
                 if (path.endsWith('.json')) {
@@ -75,11 +78,9 @@ export class DependencyParser {
                     path: this.normalizePath(sourcePath, path)
                 })
             }
-
-            lineNumber++
         }
 
-        return [result, lineNumber - 1]
+        return [result, lineNumber]
     }
 
     private normalizePath(sourcePath: string, path: string): string {

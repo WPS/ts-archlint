@@ -68,6 +68,23 @@ describe(DependencyParser.name, () => {
         expect(parsed).toEqual(expected)
     })
 
+    it('should NOT parse imports in obvious comments', () => {
+
+        fileContent = `// import {Dependency1} from "./dependency1";
+        
+           //        import {Dependency2} from '../../some-folder/dependency2'
+        //import {External} from 'external-lib'; // with comment after
+        
+        class WithDependencies {
+          private value = 'singleQuoted'
+          private otherValue = "double quoted"
+        }
+        `
+
+        const parsed = parser.parseTypescriptFile(filePath)
+        expect(parsed.dependencies).toEqual([])
+    })
+
     it('should NOT parse dependencies to JSON files', () => {
 
         fileContent = `import blubb from "./dependency1.json";
@@ -76,7 +93,7 @@ describe(DependencyParser.name, () => {
 
         const expected: CodeFile = {
             path: 'path/to/file/file.ts',
-            lines: 1,
+            lines: 2,
             dependencies: []
         }
 
