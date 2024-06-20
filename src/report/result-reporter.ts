@@ -14,11 +14,10 @@ export class ResultReporter {
     reportResults(result: CheckResult): void {
         Logger.info(" _" + divider)
         logWithFrame(`Architecture [${result.architectureName}]`)
+        logWithFrame(`Analyzed ${result.dependencies} dependencies, found ${result.violations.length} violations`)
 
         this.reportViolations(result.violations);
         this.reportUnassignedFiles(result.assignment);
-
-        logWithFrame(`Analyzed ${result.dependencies} dependencies, found ${result.violations.length} violations`)
 
         Logger.info("|_" + divider)
         Logger.info("")
@@ -48,8 +47,6 @@ export class ResultReporter {
                 logWithFrame(violation)
             }
         }
-
-        logWithFrame(`Found ${violations.length} violations in total`)
     }
 
     private reportUnassignedFiles(assignment: FileToArtifactAssignment): void {
