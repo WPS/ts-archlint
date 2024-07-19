@@ -25,7 +25,8 @@ export class ArchlintCli {
   }
 
   private runAndThrow(): number {
-    Logger.info("Archlint started, linting architecture...")
+    const startTime = performance.now()
+    Logger.info("Archlint started, analyzing architecture...")
 
     let [nodePath, jsPath, ...args] = process.argv
 
@@ -62,7 +63,8 @@ export class ArchlintCli {
         returnCode = 1
       }
     }
-    Logger.info(`Exit code: ${returnCode}`)
+    const elapsed = Math.ceil(performance.now() - startTime)
+    Logger.info(`Archlint done after ${elapsed}ms. Exit Code: ${returnCode}`)
     return returnCode
   }
 
