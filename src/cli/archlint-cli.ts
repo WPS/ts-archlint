@@ -13,6 +13,18 @@ const archFolder = '.archlint'
 
 export class ArchlintCli {
     run(): number {
+        try {
+            return this.runAndThrow()
+        } catch(error: any) {
+            if(typeof error === 'string'){
+                Logger.info(error)
+                return 1
+            }
+            throw error
+        }
+    }
+
+    private runAndThrow(): number {
         Logger.info("Archlint started, linting architecture...")
 
         let [nodePath, jsPath, ...args] = process.argv

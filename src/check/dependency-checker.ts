@@ -28,7 +28,8 @@ export class DependencyChecker {
 
     checkAll(files: CodeFile[]): CheckResult {
         if (this.assignment.getEmptyArtifacts().length > 0) {
-            throw `Empty artifacts: ${this.assignment.getEmptyArtifacts().join(', ')}`
+            throw "Empty artifacts:\n"
+            + this.assignment.getEmptyArtifacts().map(it => "  - '" + it + "'").join(', ')
         }
 
         const violations: DependencyViolation[] = []
