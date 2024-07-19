@@ -1,4 +1,4 @@
 export interface Dependency {
-    line: number
-    path: string
+  line: number
+  path: string
 }

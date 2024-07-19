@@ -1,16 +1,16 @@
 export class PathPattern {
-    private readonly regex: RegExp
+  private readonly regex: RegExp
 
-    constructor(pattern: string) {
-        const regexString = pattern
-            .split("**").join(".+")
-            .split("*").join("[^/\\\\]+")
-            .split(".+").join(".*")
+  constructor(pattern: string) {
+    const regexString = pattern
+      .split("**").join(".+")
+      .split("*").join("[^/\\\\]+")
+      .split(".+").join(".*")
 
-        this.regex = RegExp("^" + regexString + "$")
-    }
+    this.regex = RegExp("^" + regexString + "$")
+  }
 
-    matches(path: string): boolean {
-        return this.regex.test(path)
-    }
+  matches(path: string): boolean {
+    return this.regex.test(path)
+  }
 }

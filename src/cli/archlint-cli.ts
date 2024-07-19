@@ -12,89 +12,89 @@ import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
 const archFolder = '.archlint'
 
 export class ArchlintCli {
-    run(): number {
-        try {
-            return this.runAndThrow()
-        } catch(error: any) {
-            if(typeof error === 'string'){
-                Logger.info(error)
-                return 1
-            }
-            throw error
-        }
+  run(): number {
+    try {
+      return this.runAndThrow()
+    } catch (error: any) {
+      if (typeof error === 'string') {
+        Logger.info(error)
+        return 1
+      }
+      throw error
+    }
+  }
+
+  private runAndThrow(): number {
+    Logger.info("Archlint started, linting architecture...")
+
+    let [nodePath, jsPath, ...args] = process.argv
+
+    const config = this.readConfig(args)
+    Logger.setVerbose(config.verbose || false)
+
+    Logger.debug("Read the following config:", config)
+
+    const checkers: DependencyChecker[] = []
+    const archFiles = this.findArchitectureFiles()
+
+    const reader = new DescriptionReader()
+
+    const codeFiles = new DependencyParser(config.srcRoot).parseFiles()
+
+    for (const archFile of archFiles) {
+      const fileContent = readFileSync(archFile).toString()
+      const description: ArchitectureDescription = reader.readDescription(fileContent)
+      const assignment = FileToArtifactAssignment.createFrom(description, codeFiles)
+      checkers.push(new DependencyChecker(description, assignment))
     }
 
-    private runAndThrow(): number {
-        Logger.info("Archlint started, linting architecture...")
+    Logger.debug(`Read ${checkers.length} dependency checkers`)
 
-        let [nodePath, jsPath, ...args] = process.argv
+    const reporter = new ResultReporter()
 
-        const config = this.readConfig(args)
-        Logger.setVerbose(config.verbose || false)
+    let returnCode = 0
 
-        Logger.debug("Read the following config:", config)
+    for (const checker of checkers) {
+      const result = checker.checkAll(codeFiles)
+      reporter.reportResults(result)
 
-        const checkers: DependencyChecker[] = []
-        const archFiles = this.findArchitectureFiles()
+      if (result.violations.length > 0 || result.failedBecauseUnassigned) {
+        returnCode = 1
+      }
+    }
+    Logger.info(`Exit code: ${returnCode}`)
+    return returnCode
+  }
 
-        const reader = new DescriptionReader()
+  private findArchitectureFiles(): string[] {
+    Logger.debug("Reading folder", archFolder)
 
-        const codeFiles = new DependencyParser(config.srcRoot).parseFiles()
+    const files = readdirSync(archFolder)
+    Logger.debug("Found the following files:", files)
 
-        for (const archFile of archFiles) {
-            const fileContent = readFileSync(archFile).toString()
-            const description: ArchitectureDescription = reader.readDescription(fileContent)
-            const assignment = FileToArtifactAssignment.createFrom(description, codeFiles)
-            checkers.push(new DependencyChecker(description, assignment))
-        }
+    return files.map(it => join(archFolder, it))
+  }
 
-        Logger.debug(`Read ${checkers.length} dependency checkers`)
-
-        const reporter = new ResultReporter()
-
-        let returnCode = 0
-
-        for (const checker of checkers) {
-            const result = checker.checkAll(codeFiles)
-            reporter.reportResults(result)
-
-            if (result.violations.length > 0 || result.failedBecauseUnassigned) {
-                returnCode = 1
-            }
-        }
-        Logger.info(`Exit code: ${returnCode}`)
-        return returnCode
+  private readConfig(args: string[]): ArchlintConfig {
+    let [srcRoot, verboseString, ...others] = args
+    if (!srcRoot) {
+      throw new Error("You need to pass the source-root as first argument")
     }
 
-    private findArchitectureFiles(): string[] {
-        Logger.debug("Reading folder", archFolder)
-
-        const files = readdirSync(archFolder)
-        Logger.debug("Found the following files:", files)
-
-        return files.map(it => join(archFolder, it))
+    if (others.length > 0) {
+      throw new Error("Unexpected number of arguments")
     }
 
-    private readConfig(args: string[]): ArchlintConfig {
-        let [srcRoot, verboseString, ...others] = args
-        if (!srcRoot) {
-            throw new Error("You need to pass the source-root as first argument")
-        }
-
-        if (others.length > 0) {
-            throw new Error("Unexpected number of arguments")
-        }
-
-        let verbose = false
-        if (verboseString === '-v' || verboseString === '--verbose') {
-            verbose = true
-        } else if (verboseString) {
-            throw new Error(`Unexpected parameter: '${verboseString}'`)
-        }
-
-        return {
-            srcRoot,
-            verbose
-        }
+    let verbose = false
+    if (verboseString === '-v' || verboseString === '--verbose') {
+      verbose = true
+    } else if (verboseString) {
+      throw new Error(`Unexpected parameter: '${verboseString}'`)
     }
+
+    return {
+      srcRoot,
+      verbose
+    }
+  }
 }

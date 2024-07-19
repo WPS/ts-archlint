@@ -12,92 +12,92 @@ const regexComment = RegExp("^\\s*//.*")
 const defaultReadFile = (path: string) => readFileSync(path).toString()
 
 export class DependencyParser {
-    constructor(private rootPath: string, private read: (path: string) => string = defaultReadFile) {
+  constructor(private rootPath: string, private read: (path: string) => string = defaultReadFile) {
+  }
+
+  parseFiles(): CodeFile[] {
+    const result = this.parseFilesRecursively(this.rootPath)
+
+    const lines = result.map(it => it.lines).reduce((a, b) => a + b, 0)
+    Logger.info(`Done parsing ${result.length} files (${lines} lines total)`)
+    return result
+  }
+
+  private parseFilesRecursively(directory: string): CodeFile[] {
+    Logger.debug(`parsing directory ${directory}`)
+
+    const result: CodeFile[] = []
+
+    const children = readdirSync(directory, {withFileTypes: true})
+
+    for (const child of children) {
+      const childPath = join(directory, child.name)
+      if (child.isDirectory()) {
+        result.push(...this.parseFilesRecursively(childPath))
+      } else if (childPath.endsWith('.ts')) {
+        result.push(this.parseTypescriptFile(childPath))
+      }
     }
 
-    parseFiles(): CodeFile[] {
-        const result = this.parseFilesRecursively(this.rootPath)
+    return result
+  }
 
-        const lines = result.map(it => it.lines).reduce((a, b) => a + b, 0)
-        Logger.info(`Done parsing ${result.length} files (${lines} lines total)`)
-        return result
-    }
+  parseTypescriptFile(path: string): CodeFile {
+    const content = this.read(path)
+    const [dependencies, lines] = this.parseDependencies(dirname(path), content)
 
-    private parseFilesRecursively(directory: string): CodeFile[] {
-        Logger.debug(`parsing directory ${directory}`)
+    const codeFile: CodeFile = {
+      path: this.toForwardSlashes(relative(this.rootPath, path)),
+      lines,
+      dependencies
+    };
 
-        const result: CodeFile[] = []
+    Logger.debug("Parsed file", codeFile)
+    return codeFile
+  }
 
-        const children = readdirSync(directory, {withFileTypes: true})
+  private parseDependencies(sourcePath: string, fileContent: string): [Dependency[], number] {
+    const result: Dependency[] = []
 
-        for (const child of children) {
-            const childPath = join(directory, child.name)
-            if (child.isDirectory()) {
-                result.push(...this.parseFilesRecursively(childPath))
-            } else if (childPath.endsWith('.ts')) {
-                result.push(this.parseTypescriptFile(childPath))
-            }
+    const lines = fileContent.split(/\r?\n/)
+    let lineNumber = 0
+    for (const line of lines) {
+      lineNumber++
+
+      const match = regexFromImport.exec(line) ?? regexLazyImport.exec(line)
+
+      if (match && !regexComment.exec(line)) {
+        const [_, path] = match
+
+        if (path.endsWith('.json')) {
+          continue
         }
 
-        return result
+        result.push({
+          line: lineNumber,
+          path: this.normalizePath(sourcePath, path)
+        })
+      }
     }
 
-    parseTypescriptFile(path: string): CodeFile {
-        const content = this.read(path)
-        const [dependencies, lines] = this.parseDependencies(dirname(path), content)
+    return [result, lineNumber]
+  }
 
-        const codeFile: CodeFile = {
-            path: this.toForwardSlashes(relative(this.rootPath, path)),
-            lines,
-            dependencies
-        };
-
-        Logger.debug("Parsed file", codeFile)
-        return codeFile
+  private normalizePath(sourcePath: string, path: string): string {
+    if (!path.startsWith('.')) {
+      return 'node_modules:' + path
     }
 
-    private parseDependencies(sourcePath: string, fileContent: string): [Dependency[], number] {
-        const result: Dependency[] = []
+    const absolute = join(sourcePath, path)
+    const withoutPrefix = relative(this.rootPath, absolute)
 
-        const lines = fileContent.split(/\r?\n/)
-        let lineNumber = 0
-        for (const line of lines) {
-            lineNumber++
+    const fullPath = this.toForwardSlashes(withoutPrefix);
 
-            const match = regexFromImport.exec(line) ?? regexLazyImport.exec(line)
+    return fullPath + '.ts'
+  }
 
-            if (match && !regexComment.exec(line)) {
-                const [_, path] = match
-
-                if (path.endsWith('.json')) {
-                    continue
-                }
-
-                result.push({
-                    line: lineNumber,
-                    path: this.normalizePath(sourcePath, path)
-                })
-            }
-        }
-
-        return [result, lineNumber]
-    }
-
-    private normalizePath(sourcePath: string, path: string): string {
-        if (!path.startsWith('.')) {
-            return 'node_modules:' + path
-        }
-
-        const absolute = join(sourcePath, path)
-        const withoutPrefix = relative(this.rootPath, absolute)
-
-        const fullPath = this.toForwardSlashes(withoutPrefix);
-
-        return fullPath + '.ts'
-    }
-
-    private toForwardSlashes(path: string): string {
-        return path.split('\\')
-            .join('/')
-    }
+  private toForwardSlashes(path: string): string {
+    return path.split('\\')
+      .join('/')
+  }
 }
