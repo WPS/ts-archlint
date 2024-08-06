@@ -60,7 +60,7 @@ describe(DependencyParser.name, () => {
         },
         {
           line: 4,
-          path: 'node_modules:external-lib'
+          path: 'node_modules/external-lib'
         }
       ]
     }

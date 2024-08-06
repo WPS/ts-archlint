@@ -25,9 +25,11 @@ export class FileToArtifactAssignment {
 
     const globalExcludes = (description.exclude ?? []).map(it => new PathPattern(it))
 
-    const keepFile = (file: CodeFile) => !globalExcludes.some(it => it.matches(file.path))
+    const keepPath = (path: string) => !globalExcludes.some(it => it.matches(path))
 
-    for (const {path} of files.filter(keepFile)) {
+    const allPaths = files.flatMap(it => [it.path, ...it.dependencies.map(d => d.path)])
+
+    for (const path of allPaths.filter(keepPath)) {
       // reverse sorgt dafür, dass das spezifischste zuerst kommt
       const matching = this.findMatchingArtifact(path, withIncludes)
       if (matching) {

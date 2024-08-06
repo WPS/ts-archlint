@@ -1,6 +1,8 @@
 import {FileToArtifactAssignment} from "./file-to-artifact-assignment";
 import {ArtifactDescription} from "../describe/artifact-description";
 import {CodeFile} from "../parse/code-file";
+import {Dependency} from "../parse/dependency";
+import {ArchitectureDescription} from "../describe/architecture-description";
 
 describe(FileToArtifactAssignment.name, () => {
   let artifacts: ArtifactDescription[]
@@ -33,7 +35,7 @@ describe(FileToArtifactAssignment.name, () => {
             ]
           },
         ]
-      }
+      },
     ]
   })
 
@@ -53,7 +55,7 @@ describe(FileToArtifactAssignment.name, () => {
       'three/child1/file.ts',
       'three/child2/file.ts',
       'four/child3/file.ts'
-    ].map(path => ({path} as CodeFile))
+    ].map(path => ({path, dependencies: [] as Dependency[]} as CodeFile))
 
     const assignment = FileToArtifactAssignment.createFrom({
       name: 'test',
@@ -82,5 +84,51 @@ describe(FileToArtifactAssignment.name, () => {
       'three/child1/file.ts',
       'three/child2/file.ts'
     ])
+  })
+
+  it('should not warn for empty artifacts if the artifact is referenced via dependency', () => {
+    const files: CodeFile[] = [
+      {
+        path: 'one/file/inside.ts',
+        dependencies: [
+          {
+            path: 'node_modules/library-one',
+            line: 3,
+          },
+          {
+            path: 'node_modules/library-two',
+            line: 4,
+          }
+        ],
+        lines: 89
+      },
+    ]
+
+    const artifacts: ArtifactDescription[] = [
+      {
+        name: "one",
+        include: "one/**"
+      },
+      {
+        name: "library-one",
+        include: "node_modules/library-one"
+      },
+      {
+        name: 'other-libraries',
+        include: "node_modules/**"
+      }
+    ]
+
+    const description: ArchitectureDescription = {
+      name: 'assignment',
+      artifacts,
+    }
+
+    const assignment = FileToArtifactAssignment.createFrom(description, files)
+
+    expect(assignment.findArtifact('one/file/inside.ts')).toBe('one')
+    expect(assignment.findArtifact('node_modules/library-one')).toBe('library-one')
+    expect(assignment.findArtifact('node_modules/library-two')).toBe('other-libraries')
+    expect(assignment.getEmptyArtifacts()).toEqual([])
   })
 })

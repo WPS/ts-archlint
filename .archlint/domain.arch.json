@@ -2,7 +2,6 @@
   "$schema": "../src/schema.json",
   "name": "domain-layers",
   "exclude": [
-    "node_modules**",
     "**.spec.ts"
   ],
   "failOnUnassigned": true,
@@ -66,6 +65,11 @@
       "include": [
         "common/**"
       ],
+      "mayBeUsedFromAllAbove": true
+    },
+    {
+      "name": "external",
+      "include": "node_modules/**",
       "mayBeUsedFromAllAbove": true
     }
   ]
