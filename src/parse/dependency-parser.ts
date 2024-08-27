@@ -85,7 +85,7 @@ export class DependencyParser {
 
   private normalizePath(sourcePath: string, path: string): string {
     if (!path.startsWith('.')) {
-      return 'node_modules/' + path
+      return 'node_modules:' + path
     }
 
     const absolute = join(sourcePath, path)
