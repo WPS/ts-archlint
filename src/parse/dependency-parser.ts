@@ -21,7 +21,7 @@ export class DependencyParser {
 
   parseFiles(filePaths: string[]): CodeFile[] {
     const result = filePaths.map((filePath) =>
-      this.parseTypescriptFile(filePath, this.tsConfigImportRemaps)
+      this.parseTypescriptFile(filePath)
     );
 
     const lines = result.map((it) => it.lines).reduce((a, b) => a + b, 0);
@@ -29,16 +29,12 @@ export class DependencyParser {
     return result;
   }
 
-  parseTypescriptFile(
-    path: string,
-    tsConfigImportRemaps?: ImportRemaps
-  ): CodeFile {
-    console.log(tsConfigImportRemaps);
+  parseTypescriptFile(path: string): CodeFile {
     const content = this.read(path);
     const [dependencies, lines] = this.parseDependencies(
       dirname(path),
       content,
-      tsConfigImportRemaps
+      this.tsConfigImportRemaps
     );
 
     const codeFile: CodeFile = {
@@ -56,7 +52,6 @@ export class DependencyParser {
     fileContent: string,
     tsConfigImportRemaps?: ImportRemaps
   ): [Dependency[], number] {
-    console.log(tsConfigImportRemaps);
     const result: Dependency[] = [];
 
     const lines = fileContent.split(/\r?\n/);
@@ -72,20 +67,24 @@ export class DependencyParser {
         if (path.endsWith('.json')) {
           continue;
         }
-        console.log(tsConfigImportRemaps);
 
-        let dependencyPath = this.normalizePath(
-          sourcePath,
-          path,
-          tsConfigImportRemaps ? Object.keys(tsConfigImportRemaps) : []
-        );
-
+        let dependencyPath = path;
         if (tsConfigImportRemaps) {
           dependencyPath = this.remapImports(
             dependencyPath,
             tsConfigImportRemaps
           );
         }
+
+        dependencyPath = this.normalizePath(
+          sourcePath,
+          dependencyPath,
+          tsConfigImportRemaps
+            ? Object.keys(tsConfigImportRemaps).map(
+                (key) => tsConfigImportRemaps[key]
+              )
+            : []
+        );
 
         result.push({
           line: lineNumber,
@@ -100,9 +99,9 @@ export class DependencyParser {
   remapImports(path: string, tsConfigImportRemaps: ImportRemaps): string {
     let result = path;
     Object.keys(tsConfigImportRemaps).forEach((matchPath) => {
-      result.replace(
-        new RegExp('^\\/?(' + matchPath + ')\\/'),
-        tsConfigImportRemaps[matchPath]
+      result = result.replace(
+        new RegExp(`^(\\/)?(${matchPath})(\\/)`),
+        `${tsConfigImportRemaps[matchPath]}/`
       );
     });
 
@@ -114,7 +113,6 @@ export class DependencyParser {
     path: string,
     skipNodeModulePrefixFor: string[]
   ): string {
-    console.log(skipNodeModulePrefixFor, path);
     if (
       !path.startsWith('.') &&
       !skipNodeModulePrefixFor.some((skipPath) => path.startsWith(skipPath))
@@ -122,12 +120,12 @@ export class DependencyParser {
       return 'node_modules:' + path;
     }
 
-    const absolute = join(sourcePath, path);
-    const withoutPrefix = relative(this.rootPath, absolute);
+    let pathRelativeToRoot = path;
+    if (path.startsWith('.')) {
+      pathRelativeToRoot = relative(this.rootPath, join(sourcePath, path));
+    }
 
-    const fullPath = this.toForwardSlashes(withoutPrefix);
-
-    return fullPath + '.ts';
+    return this.toForwardSlashes(pathRelativeToRoot) + '.ts';
   }
 
   private toForwardSlashes(path: string): string {

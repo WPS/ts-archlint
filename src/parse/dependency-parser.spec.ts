@@ -155,20 +155,31 @@ describe(DependencyParser.name, () => {
 
       const parsed = parser.parseTypescriptFile(filePath);
 
-      const expected: CodeFile = {
-        path: 'path/to/file/file.ts',
-        lines: 1,
-        dependencies: [
-          {
-            line: 1,
-            path: `${tsConfigImportRemaps[mappedImportPath]}/test`
-          }
-        ]
-      };
-
-      expect(parsed).toEqual(expected);
+      expect(parsed.dependencies[0].path.startsWith('node_modules')).toBe(
+        false
+      );
     });
   });
 
-  it('should replace paths included in tsConfigImportRemaps', () => {});
+  it('should replace paths included in tsConfigImportRemaps', () => {
+    const mappedImportPath = Object.keys(tsConfigImportRemaps)[0];
+    fileContent = `import { blubb } from "${mappedImportPath}/test";`;
+
+    const parsed = parser.parseTypescriptFile(filePath);
+
+    expect(parsed.dependencies[0].path).toEqual(
+      `${tsConfigImportRemaps[mappedImportPath]}/test.ts`
+    );
+  });
+
+  it('should replace paths included in tsConfigImportRemaps and remove leading slash', () => {
+    const mappedImportPath = Object.keys(tsConfigImportRemaps)[0];
+    fileContent = `import { blubb } from "/${mappedImportPath}/test";`;
+
+    const parsed = parser.parseTypescriptFile(filePath);
+
+    expect(parsed.dependencies[0].path).toEqual(
+      `${tsConfigImportRemaps[mappedImportPath]}/test.ts`
+    );
+  });
 });
