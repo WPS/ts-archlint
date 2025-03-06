@@ -1,8 +1,5 @@
 import { ArtifactDescription } from './artifact-description';
-
-export type ImportRemaps = {
-  [path: string]: string;
-};
+import { ImportRemaps } from '../common/import-remaps';
 
 export interface ArchitectureDescription {
   name: string;

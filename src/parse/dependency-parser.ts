@@ -2,9 +2,9 @@ import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 
 import { Logger } from '../common/logger';
-import { ImportRemaps } from '../describe/architecture-description';
 import { CodeFile } from './code-file';
 import { Dependency } from './dependency';
+import { ImportRemaps } from '../common/import-remaps';
 
 const regexFromImport = /from\s*['"](.+?)['"];?/;
 const regexLazyImport = /import\(['"](.+?)['"]\)/;

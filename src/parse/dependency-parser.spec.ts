@@ -1,4 +1,4 @@
-import { ImportRemaps } from '../describe/architecture-description';
+import { ImportRemaps } from '../common/import-remaps';
 import { CodeFile } from './code-file';
 import { DependencyParser } from './dependency-parser';
 
