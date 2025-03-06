@@ -28,6 +28,11 @@
     "failOnUnassigned": {
       "type": "boolean"
     },
+    "tsConfigImportRemaps": {
+      "type": "object",
+      "description": "Additional paths from tsconfig.json, mapped path must be relative to rootPath",
+      "additionalProperties": { "type": "string" }
+    },
     "artifacts": {
       "type": "array",
       "items": {
@@ -37,10 +42,7 @@
     }
   },
   "additionalProperties": false,
-  "required": [
-    "name",
-    "artifacts"
-  ],
+  "required": ["name", "artifacts"],
   "definitions": {
     "ArtifactDescription": {
       "type": "object",
@@ -70,9 +72,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [
-        "name"
-      ]
+      "required": ["name"]
     },
     "ArtifactNames": {
       "oneOf": [

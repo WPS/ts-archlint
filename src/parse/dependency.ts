@@ -1,4 +1,7 @@
 export interface Dependency {
-  line: number
-  path: string
+  line: number;
+  /**
+   * path relative to rootPath
+   */
+  path: string;
 }
