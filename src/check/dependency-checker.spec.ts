@@ -2,6 +2,8 @@ import { DependencyChecker } from './dependency-checker';
 import { ArchitectureDescription } from '../describe/architecture-description';
 import { DependencyViolation } from './dependency-violation';
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment';
+import { DependencyParser } from '../parse/dependency-parser';
+import { Dependency } from '../parse/dependency';
 
 describe(DependencyChecker.name, () => {
   let architecture: ArchitectureDescription;
@@ -14,6 +16,107 @@ describe(DependencyChecker.name, () => {
     assignment.findArtifact = (it) => null;
     assignment.getUnassignedPaths = () => [];
     assignment.getEmptyArtifacts = () => [];
+  });
+
+  describe('checkAll', () => {
+    const tsConfigImportRemaps = { test: 'test1' };
+    beforeEach(() => {
+      architecture = {
+        name: 'TestArchitecture',
+        tsConfigImportRemaps: tsConfigImportRemaps,
+        artifacts: [
+          {
+            name: 'domain',
+            include: ['**/domain/*'],
+            mayBeUsedFromAllAbove: true
+          }
+        ]
+      };
+
+      checker = new DependencyChecker(architecture, assignment);
+    });
+
+    it('should throw on empty artifacts', () => {
+      assignment.getEmptyArtifacts = () => ['test'];
+      expect(() => checker.checkAll('test', ['test'])).toThrow();
+    });
+
+    it('should call checkFile with correct parser for each file', () => {
+      const mockCheckFile = jest.fn(
+        (
+          filePath: string,
+          dependencyParser: DependencyParser,
+          dependencyCounter: { count: number }
+        ) => {
+          dependencyCounter.count++;
+          return [];
+        }
+      );
+      checker.checkFile = mockCheckFile;
+
+      const filePaths = ['file1.ts', 'path/to/file2.ts'];
+      const { assignment, ...rest } = checker.checkAll('root', filePaths);
+
+      expect(mockCheckFile.mock.calls).toHaveLength(2);
+      filePaths.forEach((fp, index) => {
+        expect(mockCheckFile.mock.calls[index][0]).toEqual(fp);
+        expect(
+          mockCheckFile.mock.calls[index][1]['tsConfigImportRemaps']
+        ).toEqual(tsConfigImportRemaps);
+      });
+      expect(rest).toEqual({
+        architectureName: 'TestArchitecture',
+        dependencies: 2,
+        failedBecauseUnassigned: false,
+        violations: []
+      });
+    });
+
+    it('should parse file and check each dependency', () => {
+      const mockCheckDependency = jest.fn(
+        (filePath: string, dependency: Dependency) => {
+          return undefined;
+        }
+      );
+      checker.checkDependency = mockCheckDependency;
+
+      const testFilePath = 'test';
+      const dependencyParser = new DependencyParser('');
+      const codeFile = {
+        path: '',
+        lines: 42,
+        dependencies: [
+          {
+            line: 7,
+            path: '/test1.ts'
+          },
+          {
+            line: 8,
+            path: '/test2.ts'
+          }
+        ]
+      };
+      const mockParse = jest.fn((filePath) => ({
+        ...codeFile,
+        path: filePath
+      }));
+      dependencyParser.parseTypescriptFile = mockParse;
+
+      const dependencyCounter = { count: 0 };
+      checker.checkFile(testFilePath, dependencyParser, dependencyCounter);
+
+      expect(dependencyCounter.count).toBe(2);
+      expect(mockParse.mock.calls).toHaveLength(1);
+      expect(mockParse.mock.calls[0][0]).toBe(testFilePath);
+      expect(mockCheckDependency.mock.calls).toHaveLength(2);
+      expect(mockCheckDependency.mock.calls.map((call) => call[0])).toEqual([
+        testFilePath,
+        testFilePath
+      ]);
+      expect(mockCheckDependency.mock.calls.map((call) => call[1])).toEqual(
+        codeFile.dependencies
+      );
+    });
   });
 
   describe('with a nested architecture', function () {
@@ -309,20 +412,19 @@ describe(DependencyChecker.name, () => {
     fromPath: string,
     toPath: string
   ): DependencyViolation | null {
-    const result: DependencyViolation[] = [];
-    checker.checkFile(
-      {
-        path: fromPath,
-        lines: 42,
-        dependencies: [
-          {
-            line: 7,
-            path: toPath
-          }
-        ]
-      },
-      result
-    );
+    const dependencyParser = new DependencyParser('');
+    const codeFile = {
+      path: fromPath,
+      lines: 42,
+      dependencies: [
+        {
+          line: 7,
+          path: toPath
+        }
+      ]
+    };
+    dependencyParser.parseTypescriptFile = jest.fn(() => codeFile);
+    const result = checker.checkFile('', dependencyParser, { count: 0 });
 
     expect(result.length).toBeLessThanOrEqual(1);
     return result[0] ?? null;

@@ -20,19 +20,6 @@ export class DependencyParser {
   ) {}
 
   /***
-   * @param filePaths filepaths relative to root with forward slashes
-   */
-  parseFiles(filePaths: string[]): CodeFile[] {
-    const result = filePaths.map((filePath) =>
-      this.parseTypescriptFile(filePath)
-    );
-
-    const lines = result.map((it) => it.lines).reduce((a, b) => a + b, 0);
-    Logger.info(`Done parsing ${result.length} files (${lines} lines total)`);
-    return result;
-  }
-
-  /***
    * @param path filepath relative to root with forward slashes
    */
   parseTypescriptFile(path: string): CodeFile {

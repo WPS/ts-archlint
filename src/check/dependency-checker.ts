@@ -47,37 +47,44 @@ export class DependencyChecker {
       );
     }
 
-    const files = new DependencyParser(
+    const dependencyParser = new DependencyParser(
       rootPath,
       this.description.tsConfigImportRemaps
-    ).parseFiles(filePaths);
+    );
 
     const violations: DependencyViolation[] = [];
 
-    let dependencies = 0;
-    for (const file of files) {
-      dependencies += this.checkFile(file, violations);
+    const dependencyCounter = { count: 0 };
+    for (const filePath of filePaths) {
+      violations.push(
+        ...this.checkFile(filePath, dependencyParser, dependencyCounter)
+      );
     }
 
     return {
       architectureName: this.description.name,
       violations,
-      dependencies,
+      dependencies: dependencyCounter.count,
       assignment: this.assignment,
       failedBecauseUnassigned: this.failedBecauseUnassigned()
     };
   }
 
-  public checkFile(file: CodeFile, result: DependencyViolation[]): number {
-    let count = 0;
+  public checkFile(
+    filePath: string,
+    dependencyParser: DependencyParser,
+    dependencyCounter: { count: number }
+  ): DependencyViolation[] {
+    const result: DependencyViolation[] = [];
+    const file = dependencyParser.parseTypescriptFile(filePath);
     for (const dependency of file.dependencies) {
       const violation = this.checkDependency(file.path, dependency);
       if (violation) {
         result.push(violation);
       }
-      count++;
+      dependencyCounter.count++;
     }
-    return count;
+    return result;
   }
 
   checkDependency(
