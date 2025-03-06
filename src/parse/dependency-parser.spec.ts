@@ -3,7 +3,7 @@ import { CodeFile } from './code-file';
 import { DependencyParser } from './dependency-parser';
 
 describe(DependencyParser.name, () => {
-  const filePath = '/long/path/prefix/path/to/file/file.ts';
+  const filePath = 'path/to/file/file.ts';
   let fileContent: string;
   let parser: DependencyParser;
   const tsConfigImportRemaps: ImportRemaps = {
@@ -15,7 +15,7 @@ describe(DependencyParser.name, () => {
       '/long/path/prefix',
       tsConfigImportRemaps,
       (it) => {
-        expect(it).toBe(filePath);
+        expect(it).toBe(`/long/path/prefix/${filePath}`);
         return fileContent;
       }
     );

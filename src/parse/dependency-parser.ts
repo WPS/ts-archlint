@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { dirname, join, relative } from 'path';
+import { dirname, join } from 'path';
 
 import { Logger } from '../common/logger';
 import { ImportRemaps } from '../describe/architecture-description';
@@ -19,6 +19,9 @@ export class DependencyParser {
     private read: (path: string) => string = defaultReadFile
   ) {}
 
+  /***
+   * @param filePaths filepaths relative to root with forward slashes
+   */
   parseFiles(filePaths: string[]): CodeFile[] {
     const result = filePaths.map((filePath) =>
       this.parseTypescriptFile(filePath)
@@ -29,8 +32,12 @@ export class DependencyParser {
     return result;
   }
 
+  /***
+   * @param path filepath relative to root with forward slashes
+   */
   parseTypescriptFile(path: string): CodeFile {
-    const content = this.read(join(this.rootPath, path));
+    const pathFromRoot = this.toForwardSlashes(join(this.rootPath, path));
+    const content = this.read(pathFromRoot);
     const [dependencies, lines] = this.parseDependencies(
       dirname(path),
       content,
@@ -38,7 +45,7 @@ export class DependencyParser {
     );
 
     const codeFile: CodeFile = {
-      path: this.toForwardSlashes(relative(this.rootPath, path)),
+      path,
       lines,
       dependencies
     };
@@ -47,6 +54,13 @@ export class DependencyParser {
     return codeFile;
   }
 
+  /**
+   * parses import statements und resolves dependencies
+   * @param sourcePath directory path to resolve relative import paths (with forward slashes)
+   * @param fileContent
+   * @param tsConfigImportRemaps
+   * @returns
+   */
   private parseDependencies(
     sourcePath: string,
     fileContent: string,
@@ -76,7 +90,7 @@ export class DependencyParser {
           );
         }
 
-        dependencyPath = this.normalizePath(
+        dependencyPath = this.toAbsoluteSourcePath(
           sourcePath,
           dependencyPath,
           tsConfigImportRemaps
@@ -108,7 +122,7 @@ export class DependencyParser {
     return result;
   }
 
-  private normalizePath(
+  private toAbsoluteSourcePath(
     sourcePath: string,
     path: string,
     skipNodeModulePrefixFor: string[]
@@ -120,12 +134,14 @@ export class DependencyParser {
       return 'node_modules:' + path;
     }
 
-    let pathRelativeToRoot = path;
+    let absolutePathFromSource;
     if (path.startsWith('.')) {
-      pathRelativeToRoot = relative(this.rootPath, join(sourcePath, path));
+      absolutePathFromSource = join(sourcePath, path);
+    } else {
+      absolutePathFromSource = path;
     }
 
-    return this.toForwardSlashes(pathRelativeToRoot) + '.ts';
+    return this.toForwardSlashes(absolutePathFromSource) + '.ts';
   }
 
   private toForwardSlashes(path: string): string {
