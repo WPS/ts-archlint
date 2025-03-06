@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment';
 import { DependencyChecker } from '../check/dependency-checker';
@@ -123,10 +123,14 @@ export class ArchlintCli {
           ...this.findAllProjectFilesRecursively(rootPath, childPath)
         );
       } else if (childPath.endsWith('.ts')) {
-        result.push(childPath);
+        result.push(this.toForwardSlashes(relative(rootPath, childPath)));
       }
     }
 
     return result;
+  }
+
+  private toForwardSlashes(path: string): string {
+    return path.split('\\').join('/');
   }
 }

@@ -30,7 +30,7 @@ export class DependencyParser {
   }
 
   parseTypescriptFile(path: string): CodeFile {
-    const content = this.read(path);
+    const content = this.read(join(this.rootPath, path));
     const [dependencies, lines] = this.parseDependencies(
       dirname(path),
       content,
