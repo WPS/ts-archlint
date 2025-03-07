@@ -1,12 +1,13 @@
-import { ArchitectureDescription } from '../describe/architecture-description'
-import { ArtifactDescription } from '../describe/artifact-description'
-import { PathPattern } from './path-pattern'
+import {ArtifactDescription} from '../describe/artifact-description'
+import {PathPattern} from './path-pattern'
+import {CodeFile} from '../parse/code-file'
+import {ArchitectureDescription} from '../describe/architecture-description'
 
 interface ArtifactWithInclude {
-  name: string;
-  include: PathPattern[];
-  children: ArtifactWithInclude[];
-  fileInside: boolean;
+  name: string
+  include: PathPattern[]
+  children: ArtifactWithInclude[]
+  fileInside: boolean
 }
 
 export class FileToArtifactAssignment {
@@ -15,27 +16,16 @@ export class FileToArtifactAssignment {
   private unassignedPaths: string[] = []
   private emptyArtifacts: string[] = []
 
-  static createFrom(
-    description: ArchitectureDescription,
-    filePaths: string[]
-  ): FileToArtifactAssignment {
+  static createFrom(description: ArchitectureDescription, filePaths: string[]): FileToArtifactAssignment {
     return new FileToArtifactAssignment(description, filePaths)
   }
 
-  private constructor(
-    description: ArchitectureDescription,
-    filePaths: string[]
-  ) {
-    const withIncludes = description.artifacts.map((it) =>
-      this.toArtifactWithInclude(it, [])
-    )
+  private constructor(description: ArchitectureDescription, filePaths: string[]) {
+    const withIncludes = description.artifacts.map(it => this.toArtifactWithInclude(it, []))
 
-    const globalExcludes = (description.exclude ?? []).map(
-      (it) => new PathPattern(it)
-    )
+    const globalExcludes = (description.exclude ?? []).map(it => new PathPattern(it))
 
-    const keepFile = (filePath: string) =>
-      !globalExcludes.some((it) => it.matches(filePath))
+    const keepFile = (filePath: string) => !globalExcludes.some(it => it.matches(filePath))
 
     for (const path of filePaths.filter(keepFile)) {
       // reverse sorgt dafür, dass das spezifischste zuerst kommt
@@ -60,10 +50,7 @@ export class FileToArtifactAssignment {
     }
   }
 
-  private toArtifactWithInclude(
-    artifact: ArtifactDescription,
-    parentNames: string[]
-  ): ArtifactWithInclude {
+  private toArtifactWithInclude(artifact: ArtifactDescription, parentNames: string[]): ArtifactWithInclude {
     const names = [...parentNames, artifact.name]
 
     const includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it))
@@ -75,10 +62,8 @@ export class FileToArtifactAssignment {
     return {
       name: names.join('.'),
       include: includePatterns,
-      children: (artifact.children ?? []).map((it) =>
-        this.toArtifactWithInclude(it, names)
-      ),
-      fileInside: false,
+      children: (artifact.children ?? []).map(it => this.toArtifactWithInclude(it, names)),
+      fileInside: false
     }
   }
 
@@ -94,10 +79,7 @@ export class FileToArtifactAssignment {
     return [...this.emptyArtifacts]
   }
 
-  private findMatchingArtifact(
-    path: string,
-    artifacts: ArtifactWithInclude[]
-  ): ArtifactWithInclude | null {
+  private findMatchingArtifact(path: string, artifacts: ArtifactWithInclude[]): ArtifactWithInclude | null {
     for (const artifact of artifacts) {
       const matching = this.findMatching(path, artifact)
       if (matching) {
@@ -108,11 +90,8 @@ export class FileToArtifactAssignment {
     return null
   }
 
-  private findMatching(
-    path: string,
-    artifact: ArtifactWithInclude
-  ): ArtifactWithInclude | null {
-    if (!artifact.include.some((it) => it.matches(path))) {
+  private findMatching(path: string, artifact: ArtifactWithInclude): ArtifactWithInclude | null {
+    if (!artifact.include.some(it => it.matches(path))) {
       return null
     }
     artifact.fileInside = true
@@ -131,7 +110,7 @@ export class FileToArtifactAssignment {
       return []
     }
 
-    if (typeof value === 'string') {
+    if ((typeof value === 'string')) {
       return [value]
     } else {
       return value

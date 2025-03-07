@@ -132,7 +132,10 @@ describe(DependencyChecker.name, () => {
               {
                 name: 'manf',
                 include: '*/manf/**',
-                mayUse: ['lieferung', 'stammdaten']
+                mayUse: [
+                  'lieferung',
+                  'stammdaten'
+                ]
               },
               {
                 name: 'lieferung',
@@ -260,8 +263,12 @@ describe(DependencyChecker.name, () => {
     beforeEach(() => {
       architecture = {
         name: 'with-includes',
-        include: ['projects/included/**'],
-        exclude: ['projects/included/exception/**'],
+        include: [
+          'projects/included/**'
+        ],
+        exclude: [
+          'projects/included/exception/**'
+        ],
         artifacts: [
           {
             name: 'one',
@@ -270,7 +277,7 @@ describe(DependencyChecker.name, () => {
           },
           {
             name: 'two',
-            include: '**/two/**'
+            include: '**/two/**',
           },
           {
             name: 'three',
@@ -285,44 +292,14 @@ describe(DependencyChecker.name, () => {
     })
 
     it('should return violations correctly', () => {
-      expect(
-        getViolation(
-          'projects/included/one/file.ts',
-          'projects/included/two/file.ts'
-        )
-      ).toBeNull()
-      expect(
-        getViolation(
-          'projects/included/two/file.ts',
-          'projects/included/one/file.ts'
-        )
-      ).not.toBeNull()
+      expect(getViolation('projects/included/one/file.ts', 'projects/included/two/file.ts')).toBeNull()
+      expect(getViolation('projects/included/two/file.ts', 'projects/included/one/file.ts')).not.toBeNull()
 
-      expect(
-        getViolation(
-          'projects/included/one/file.ts',
-          'projects/included/exception/three/file.ts'
-        )
-      ).toBeNull()
-      expect(
-        getViolation(
-          'projects/included/two/file.ts',
-          'projects/included/exception/three/file.ts'
-        )
-      ).toBeNull()
+      expect(getViolation('projects/included/one/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
+      expect(getViolation('projects/included/two/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
 
-      expect(
-        getViolation(
-          'projects/included/one/file.ts',
-          'projects/excluded/three/file.ts'
-        )
-      ).toBeNull()
-      expect(
-        getViolation(
-          'projects/included/two/file.ts',
-          'projects/excluded/three/file.ts'
-        )
-      ).toBeNull()
+      expect(getViolation('projects/included/one/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
+      expect(getViolation('projects/included/two/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
 
       expect(getViolation('projects/included/one/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
       expect(getViolation('projects/included/two/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
