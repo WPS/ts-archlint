@@ -1,8 +1,8 @@
-import { ArtifactDescription } from '../describe/artifact-description';
-import { FileToArtifactAssignment } from './file-to-artifact-assignment';
+import { ArtifactDescription } from '../describe/artifact-description'
+import { FileToArtifactAssignment } from './file-to-artifact-assignment'
 
 describe(FileToArtifactAssignment.name, () => {
-  let artifacts: ArtifactDescription[];
+  let artifacts: ArtifactDescription[]
 
   beforeEach(() => {
     artifacts = [
@@ -31,8 +31,8 @@ describe(FileToArtifactAssignment.name, () => {
           }
         ]
       }
-    ];
-  });
+    ]
+  })
 
   it('should assign files', () => {
     const files = [
@@ -50,7 +50,7 @@ describe(FileToArtifactAssignment.name, () => {
       'three/child1/file.ts',
       'three/child2/file.ts',
       'four/child3/file.ts'
-    ];
+    ]
 
     const assignment = FileToArtifactAssignment.createFrom(
       {
@@ -59,30 +59,30 @@ describe(FileToArtifactAssignment.name, () => {
         artifacts
       },
       files
-    );
+    )
 
-    expect(assignment.findArtifact('one/file/inside.ts')).toEqual('one');
-    expect(assignment.findArtifact('two/files/inside.ts')).toEqual('two');
+    expect(assignment.findArtifact('one/file/inside.ts')).toEqual('one')
+    expect(assignment.findArtifact('two/files/inside.ts')).toEqual('two')
 
-    expect(assignment.findArtifact('one/child1/file.ts')).toEqual('one.child1');
-    expect(assignment.findArtifact('one/child2/file.ts')).toEqual('one.child2');
-    expect(assignment.findArtifact('two/child2/file.ts')).toEqual('two.child2');
+    expect(assignment.findArtifact('one/child1/file.ts')).toEqual('one.child1')
+    expect(assignment.findArtifact('one/child2/file.ts')).toEqual('one.child2')
+    expect(assignment.findArtifact('two/child2/file.ts')).toEqual('two.child2')
 
     expect(assignment.findArtifact('two/child2/grandchild1/file.ts')).toEqual(
       'two.child2.grandchild1'
-    );
+    )
     expect(assignment.findArtifact('one/child2/grandchild1/file.ts')).toEqual(
       'one.child2'
-    );
+    )
 
-    expect(assignment.findArtifact('three/child1/file.ts')).toBeNull();
-    expect(assignment.findArtifact('three/child2/file.ts')).toBeNull();
-    expect(assignment.findArtifact('four/child1/file.ts')).toBeNull();
+    expect(assignment.findArtifact('three/child1/file.ts')).toBeNull()
+    expect(assignment.findArtifact('three/child2/file.ts')).toBeNull()
+    expect(assignment.findArtifact('four/child1/file.ts')).toBeNull()
 
-    expect(assignment.getEmptyArtifacts()).toEqual(['two.child1']);
+    expect(assignment.getEmptyArtifacts()).toEqual(['two.child1'])
     expect(assignment.getUnassignedPaths()).toEqual([
       'three/child1/file.ts',
       'three/child2/file.ts'
-    ]);
-  });
-});
+    ])
+  })
+})

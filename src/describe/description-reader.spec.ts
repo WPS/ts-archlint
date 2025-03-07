@@ -1,6 +1,6 @@
-import {DescriptionReader} from "./description-reader";
-import {ArchitectureDescription} from "./architecture-description";
-import {ArtifactDescription} from "./artifact-description";
+import {DescriptionReader} from './description-reader'
+import {ArchitectureDescription} from './architecture-description'
+import {ArtifactDescription} from './artifact-description'
 
 describe(DescriptionReader.name, () => {
   let reader: DescriptionReader
@@ -32,12 +32,12 @@ describe(DescriptionReader.name, () => {
     })
 
     it('the description name contains points ', () => {
-      description.name = "name."
+      description.name = 'name.'
       expectError()
     })
 
     it('the artifact name contains points', () => {
-      artifact.name = "name."
+      artifact.name = 'name.'
       expectError()
     })
 

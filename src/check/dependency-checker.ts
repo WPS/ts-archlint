@@ -1,18 +1,18 @@
-import { DependencyViolation } from './dependency-violation';
-import { ArchitectureDescription } from '../describe/architecture-description';
-import { Dependency } from '../parse/dependency';
-import { Artifact } from './artifact';
-import { PathPattern } from '../assign/path-pattern';
-import { CodeFile } from '../parse/code-file';
-import { Logger } from '../common/logger';
-import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment';
-import { CheckResult } from './check-result';
-import { DependencyParser } from '../parse/dependency-parser';
+import { DependencyViolation } from './dependency-violation'
+import { ArchitectureDescription } from '../describe/architecture-description'
+import { Dependency } from '../parse/dependency'
+import { Artifact } from './artifact'
+import { PathPattern } from '../assign/path-pattern'
+import { CodeFile } from '../parse/code-file'
+import { Logger } from '../common/logger'
+import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
+import { CheckResult } from './check-result'
+import { DependencyParser } from '../parse/dependency-parser'
 
 export class DependencyChecker {
-  private readonly artifactsByNames = new Map<string, Artifact>();
-  private globalExcludes: PathPattern[];
-  private globalIncludes: PathPattern[];
+  private readonly artifactsByNames = new Map<string, Artifact>()
+  private globalExcludes: PathPattern[]
+  private globalIncludes: PathPattern[]
 
   constructor(
     private description: ArchitectureDescription,
@@ -20,19 +20,19 @@ export class DependencyChecker {
   ) {
     Artifact.createFrom(description.artifacts).forEach((it) =>
       this.addArtifact(it)
-    );
+    )
     this.globalExcludes = (description.exclude ?? []).map(
       (it) => new PathPattern(it)
-    );
+    )
     this.globalIncludes = (description.include ?? []).map(
       (it) => new PathPattern(it)
-    );
+    )
   }
 
   private addArtifact(artifact: Artifact): void {
-    this.artifactsByNames.set(artifact.name, artifact);
+    this.artifactsByNames.set(artifact.name, artifact)
     for (const child of artifact.children) {
-      this.addArtifact(child);
+      this.addArtifact(child)
     }
   }
 
@@ -42,23 +42,23 @@ export class DependencyChecker {
         'Empty artifacts:\n' +
         this.assignment
           .getEmptyArtifacts()
-          .map((it) => "  - '" + it + "'")
+          .map((it) => '  - \'' + it + '\'')
           .join(', ')
-      );
+      )
     }
 
     const dependencyParser = new DependencyParser(
       rootPath,
       this.description.tsConfigImportRemaps
-    );
+    )
 
-    const violations: DependencyViolation[] = [];
+    const violations: DependencyViolation[] = []
 
-    const dependencyCounter = { count: 0 };
+    const dependencyCounter = { count: 0 }
     for (const filePath of filePaths) {
       violations.push(
         ...this.checkFile(filePath, dependencyParser, dependencyCounter)
-      );
+      )
     }
 
     return {
@@ -67,7 +67,7 @@ export class DependencyChecker {
       dependencies: dependencyCounter.count,
       assignment: this.assignment,
       failedBecauseUnassigned: this.failedBecauseUnassigned()
-    };
+    }
   }
 
   public checkFile(
@@ -75,23 +75,23 @@ export class DependencyChecker {
     dependencyParser: DependencyParser,
     dependencyCounter: { count: number }
   ): DependencyViolation[] {
-    const result: DependencyViolation[] = [];
-    const file = dependencyParser.parseTypescriptFile(filePath);
+    const result: DependencyViolation[] = []
+    const file = dependencyParser.parseTypescriptFile(filePath)
     for (const dependency of file.dependencies) {
-      const violation = this.checkDependency(file.path, dependency);
+      const violation = this.checkDependency(file.path, dependency)
       if (violation) {
-        result.push(violation);
+        result.push(violation)
       }
-      dependencyCounter.count++;
+      dependencyCounter.count++
     }
-    return result;
+    return result
   }
 
   checkDependency(
     filePath: string,
     dependency: Dependency
   ): DependencyViolation | undefined {
-    Logger.debug('Checking ' + filePath + ' -> ' + dependency.path);
+    Logger.debug('Checking ' + filePath + ' -> ' + dependency.path)
 
     if (this.globalIncludes.length > 0) {
       if (
@@ -99,8 +99,8 @@ export class DependencyChecker {
           (it) => !it.matches(filePath) || !it.matches(dependency.path)
         )
       ) {
-        Logger.debug('Not globally included -> OK');
-        return undefined;
+        Logger.debug('Not globally included -> OK')
+        return undefined
       }
     }
 
@@ -109,45 +109,45 @@ export class DependencyChecker {
         (it) => it.matches(filePath) || it.matches(dependency.path)
       )
     ) {
-      Logger.debug('Globally excluded -> OK');
-      return undefined;
+      Logger.debug('Globally excluded -> OK')
+      return undefined
     }
 
-    const from = this.findArtifact(filePath);
+    const from = this.findArtifact(filePath)
     if (!from) {
-      Logger.debug('Not described -> OK');
+      Logger.debug('Not described -> OK')
       // files that are not described are not checked
-      return undefined;
+      return undefined
     }
 
-    const to = this.findArtifact(dependency.path);
+    const to = this.findArtifact(dependency.path)
 
     if (!to) {
-      return this.createViolation(filePath, dependency, from);
+      return this.createViolation(filePath, dependency, from)
     }
 
     if (from.mayUse(to)) {
-      Logger.debug(`Connected from ${from.name} to ${to.name} -> OK`);
-      return undefined;
+      Logger.debug(`Connected from ${from.name} to ${to.name} -> OK`)
+      return undefined
     }
 
-    return this.createViolation(filePath, dependency, from, to);
+    return this.createViolation(filePath, dependency, from, to)
   }
 
   private findArtifact(path: string): Artifact | null {
-    const name = this.assignment.findArtifact(path);
+    const name = this.assignment.findArtifact(path)
 
     if (!name) {
-      return null;
+      return null
     }
 
-    const artifact = this.artifactsByNames.get(name);
+    const artifact = this.artifactsByNames.get(name)
 
     if (!artifact) {
-      throw new Error(`Unexpected artifact: '${name}'`);
+      throw new Error(`Unexpected artifact: '${name}'`)
     }
 
-    return artifact;
+    return artifact
   }
 
   private createViolation(
@@ -166,13 +166,13 @@ export class DependencyChecker {
         artifact: to?.name || null,
         path: dependency.path
       }
-    };
+    }
   }
 
   private failedBecauseUnassigned(): boolean {
     return (
       (this.description.failOnUnassigned ?? false) &&
       this.assignment.getUnassignedPaths().length > 0
-    );
+    )
   }
 }

@@ -1,5 +1,5 @@
-import { ArtifactDescription } from './artifact-description';
-import { ImportRemaps } from '../common/import-remaps';
+import { ArtifactDescription } from './artifact-description'
+import { ImportRemaps } from '../common/import-remaps'
 
 export interface ArchitectureDescription {
   name: string;

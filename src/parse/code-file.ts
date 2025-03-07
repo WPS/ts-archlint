@@ -1,4 +1,4 @@
-import {Dependency} from "./dependency";
+import {Dependency} from './dependency'
 
 export interface CodeFile {
   path: string

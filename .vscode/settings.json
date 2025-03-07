@@ -1,7 +1,13 @@
 {
-  "prettier.trailingComma": "none",
-  "prettier.singleQuote": true,
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
-  "typescriptHero.imports.stringQuoteStyle": "\""
+  "typescriptHero.imports.stringQuoteStyle": "'",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  }
 }
