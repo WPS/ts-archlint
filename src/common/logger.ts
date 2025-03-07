@@ -5,7 +5,7 @@ export class Logger {
     Logger.verbose = verbose
 
     if (verbose) {
-      Logger.log("Logger is set to verbose")
+      Logger.log('Logger is set to verbose')
     }
   }
 
@@ -20,7 +20,7 @@ export class Logger {
   }
 
   private static log(message: string, ...params: any[]): void {
-    let paramsString = ""
+    let paramsString = ''
     if (params.length > 0) {
       paramsString = JSON.stringify(params)
     }

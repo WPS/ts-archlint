@@ -1,7 +1,7 @@
-import {ArtifactDescription} from "../describe/artifact-description";
-import {PathPattern} from "./path-pattern";
-import {CodeFile} from "../parse/code-file";
-import {ArchitectureDescription} from "../describe/architecture-description";
+import {ArtifactDescription} from '../describe/artifact-description'
+import {PathPattern} from './path-pattern'
+import {CodeFile} from '../parse/code-file'
+import {ArchitectureDescription} from '../describe/architecture-description'
 
 interface ArtifactWithInclude {
   name: string
@@ -53,7 +53,7 @@ export class FileToArtifactAssignment {
   private toArtifactWithInclude(artifact: ArtifactDescription, parentNames: string[]): ArtifactWithInclude {
     const names = [...parentNames, artifact.name]
 
-    const includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it));
+    const includePatterns = this.toStringArray(artifact.include).map(it => new PathPattern(it))
 
     if (includePatterns.length === 0) {
       includePatterns.push(new PathPattern(`**/${artifact.name}/**`))

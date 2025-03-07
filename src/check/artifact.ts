@@ -1,5 +1,5 @@
-import {ArtifactDescription} from "../describe/artifact-description";
-import {Logger} from "../common/logger";
+import {ArtifactDescription} from '../describe/artifact-description'
+import {Logger} from '../common/logger'
 
 export class Artifact {
   readonly name: string
@@ -48,7 +48,7 @@ export class Artifact {
   }
 
   private joinNames(name: string, parentName: string | null): string {
-    return [parentName, name].filter(it => it).join(".")
+    return [parentName, name].filter(it => it).join('.')
   }
 
   mayUse({name}: Artifact): boolean {

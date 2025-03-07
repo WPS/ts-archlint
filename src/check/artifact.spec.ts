@@ -1,5 +1,5 @@
-import {Artifact} from "./artifact";
-import {ArtifactDescription} from "../describe/artifact-description";
+import {Artifact} from './artifact'
+import {ArtifactDescription} from '../describe/artifact-description'
 
 describe(Artifact.name, () => {
   it('should setup mayUse for children', () => {
@@ -17,7 +17,7 @@ describe(Artifact.name, () => {
     ]
 
     const [parent1, parent2] = Artifact.createFrom(descriptions)
-    const child1 = parent2.children[0];
+    const child1 = parent2.children[0]
 
     expect(parent1.name).toBe('parent1')
 
@@ -51,7 +51,7 @@ describe(Artifact.name, () => {
     const artifacts = Artifact.createFrom([description])
     expect(artifacts.length).toBe(1)
 
-    const parent = artifacts[0];
+    const parent = artifacts[0]
     expect(parent.name).toBe('one')
 
     const firstChild = getSingleChild(parent)

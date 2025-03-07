@@ -3,11 +3,11 @@ export class PathPattern {
 
   constructor(pattern: string) {
     const regexString = pattern
-      .split("**").join(".+")
-      .split("*").join("[^/\\\\]+")
-      .split(".+").join(".*")
+      .split('**').join('.+')
+      .split('*').join('[^/\\\\]+')
+      .split('.+').join('.*')
 
-    this.regex = RegExp("^" + regexString + "$")
+    this.regex = RegExp('^' + regexString + '$')
   }
 
   matches(path: string): boolean {
