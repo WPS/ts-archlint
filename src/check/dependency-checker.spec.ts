@@ -370,10 +370,7 @@ describe(DependencyChecker.name, () => {
     }
   }
 
-  function getViolation(
-    fromPath: string,
-    toPath: string
-  ): DependencyViolation | null {
+  function getViolation(fromPath: string, toPath: string): DependencyViolation | null {
     const dependencyParser = new DependencyParser('')
     const codeFile = {
       path: fromPath,
