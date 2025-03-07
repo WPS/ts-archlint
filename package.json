@@ -27,7 +27,7 @@
     "jsonschema": "^1.4.1"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-ts": "^4.2.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
     "@types/jest": "^29.4.0",
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
