@@ -1,7 +1,7 @@
-import {DependencyChecker} from "./dependency-checker";
-import {ArchitectureDescription} from "../describe/architecture-description";
-import {DependencyViolation} from "./dependency-violation";
-import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
+import {DependencyChecker} from './dependency-checker'
+import {ArchitectureDescription} from '../describe/architecture-description'
+import {DependencyViolation} from './dependency-violation'
+import {FileToArtifactAssignment} from '../assign/file-to-artifact-assignment'
 
 describe(DependencyChecker.name, () => {
   let architecture: ArchitectureDescription
@@ -92,7 +92,7 @@ describe(DependencyChecker.name, () => {
       expectViolation('stammdaten', 'lager')
       expectViolation('stammdaten.wagen', 'lager.manf')
     })
-  });
+  })
 
   describe('with a flat architecture', () => {
     beforeEach(() => {
@@ -201,15 +201,15 @@ describe(DependencyChecker.name, () => {
       expect(getViolation('projects/included/one/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
       expect(getViolation('projects/included/two/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
     })
-  });
+  })
 
   function expectViolation(fromArtifact: string, toArtifact: string | null): void {
     const {fromPath, toPath} = setupFromAndToPath(fromArtifact, toArtifact)
 
-    const violation = getViolation(fromPath, toPath);
+    const violation = getViolation(fromPath, toPath)
     expect(violation).not.toBeNull()
     if (!violation) {
-      throw new Error("The compiler does not understand otherwise")
+      throw new Error('The compiler does not understand otherwise')
     }
 
     const {from, to} = violation
@@ -229,7 +229,7 @@ describe(DependencyChecker.name, () => {
   }
 
   function setupFromAndToPath(fromArtifact: string, toArtifact: string | null): { fromPath: string, toPath: string } {
-    const fromPath = fromArtifact.split('.').join('/') + '/some/file.ts';
+    const fromPath = fromArtifact.split('.').join('/') + '/some/file.ts'
     const toPath = (toArtifact ?? 'unknown.artifact').split('.').join('/') + '/other/file.ts'
 
     assignment.findArtifact = it => {
@@ -274,4 +274,4 @@ describe(DependencyChecker.name, () => {
     expect(result.violations.length).toBeLessThanOrEqual(1)
     return result.violations[0] ?? null
   }
-});
+})

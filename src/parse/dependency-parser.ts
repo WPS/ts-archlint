@@ -1,13 +1,13 @@
-import {Dependency} from "./dependency";
-import {CodeFile} from "./code-file";
+import {Dependency} from './dependency'
+import {CodeFile} from './code-file'
 
 import {readdirSync, readFileSync} from 'fs'
 import {dirname, join, relative} from 'path'
-import {Logger} from "../common/logger";
+import {Logger} from '../common/logger'
 
 const regexFromImport = /from\s*['"](.+?)['"];?/
 const regexLazyImport = /import\(['"](.+?)['"]\)/
-const regexComment = RegExp("^\\s*//.*")
+const regexComment = RegExp('^\\s*//.*')
 
 const defaultReadFile = (path: string) => readFileSync(path).toString()
 
@@ -50,9 +50,9 @@ export class DependencyParser {
       path: this.toForwardSlashes(relative(this.rootPath, path)),
       lines,
       dependencies
-    };
+    }
 
-    Logger.debug("Parsed file", codeFile)
+    Logger.debug('Parsed file', codeFile)
     return codeFile
   }
 
@@ -91,7 +91,7 @@ export class DependencyParser {
     const absolute = join(sourcePath, path)
     const withoutPrefix = relative(this.rootPath, absolute)
 
-    const fullPath = this.toForwardSlashes(withoutPrefix);
+    const fullPath = this.toForwardSlashes(withoutPrefix)
 
     return fullPath + '.ts'
   }

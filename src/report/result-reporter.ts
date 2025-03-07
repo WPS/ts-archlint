@@ -1,26 +1,26 @@
-import {DependencyViolation} from "../check/dependency-violation";
-import {Logger} from "../common/logger";
-import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
-import {CheckResult} from "../check/check-result";
+import {DependencyViolation} from '../check/dependency-violation'
+import {Logger} from '../common/logger'
+import {FileToArtifactAssignment} from '../assign/file-to-artifact-assignment'
+import {CheckResult} from '../check/check-result'
 
 const reportNumberOfUnassignedFiles = 15
-const divider = "__________________________________________________________________________________"
+const divider = '__________________________________________________________________________________'
 
 function logWithFrame(text: string): void {
-  Logger.info("| " + text)
+  Logger.info('| ' + text)
 }
 
 export class ResultReporter {
   reportResults(result: CheckResult): void {
-    Logger.info(" _" + divider)
+    Logger.info(' _' + divider)
     logWithFrame(`Architecture [${result.architectureName}]`)
     logWithFrame(`Analyzed ${result.dependencies} dependencies, found ${result.violations.length} violations`)
 
-    this.reportViolations(result.violations);
-    this.reportUnassignedFiles(result.assignment);
+    this.reportViolations(result.violations)
+    this.reportUnassignedFiles(result.assignment)
 
-    Logger.info("|_" + divider)
-    Logger.info("")
+    Logger.info('|_' + divider)
+    Logger.info('')
   }
 
   private reportViolations(violations: DependencyViolation[]): void {
@@ -50,7 +50,7 @@ export class ResultReporter {
   }
 
   private reportUnassignedFiles(assignment: FileToArtifactAssignment): void {
-    const unassignedFiles = assignment.getUnassignedPaths();
+    const unassignedFiles = assignment.getUnassignedPaths()
     if (unassignedFiles.length > 0) {
       logWithFrame(`${unassignedFiles.length} files are not part of any artifact`)
       let count = 0
@@ -59,7 +59,7 @@ export class ResultReporter {
         logWithFrame(`  ${file}`)
 
         if (count === reportNumberOfUnassignedFiles) {
-          logWithFrame("  [...]")
+          logWithFrame('  [...]')
           break
         }
       }

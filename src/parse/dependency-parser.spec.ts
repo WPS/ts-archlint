@@ -1,5 +1,5 @@
-import {DependencyParser} from "./dependency-parser";
-import {CodeFile} from "./code-file";
+import {DependencyParser} from './dependency-parser'
+import {CodeFile} from './code-file'
 
 describe(DependencyParser.name, () => {
   const filePath = '/long/path/prefix/path/to/file/file.ts'
@@ -125,4 +125,4 @@ describe(DependencyParser.name, () => {
 
     expect(parsed).toEqual(expected)
   })
-});
+})

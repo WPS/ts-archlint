@@ -1,13 +1,13 @@
-import {DependencyParser} from "../parse/dependency-parser";
-import {DependencyChecker} from "../check/dependency-checker";
-import {ResultReporter} from "../report/result-reporter";
+import {DependencyParser} from '../parse/dependency-parser'
+import {DependencyChecker} from '../check/dependency-checker'
+import {ResultReporter} from '../report/result-reporter'
 import {readdirSync, readFileSync} from 'fs'
 import {join} from 'path'
-import {DescriptionReader} from "../describe/description-reader";
-import {ArchitectureDescription} from "../describe/architecture-description";
-import {ArchlintConfig} from "../describe/archlint-config";
-import {Logger} from "../common/logger";
-import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
+import {DescriptionReader} from '../describe/description-reader'
+import {ArchitectureDescription} from '../describe/architecture-description'
+import {ArchlintConfig} from '../describe/archlint-config'
+import {Logger} from '../common/logger'
+import {FileToArtifactAssignment} from '../assign/file-to-artifact-assignment'
 
 const archFolder = '.archlint'
 
@@ -26,14 +26,14 @@ export class ArchlintCli {
 
   private runAndThrow(): number {
     const startTime = performance.now()
-    Logger.info("Archlint started, analyzing architecture...")
+    Logger.info('Archlint started, analyzing architecture...')
 
-    let [nodePath, jsPath, ...args] = process.argv
+    const [nodePath, jsPath, ...args] = process.argv
 
     const config = this.readConfig(args)
     Logger.setVerbose(config.verbose || false)
 
-    Logger.debug("Read the following config:", config)
+    Logger.debug('Read the following config:', config)
 
     const checkers: DependencyChecker[] = []
     const archFiles = this.findArchitectureFiles()
@@ -69,22 +69,22 @@ export class ArchlintCli {
   }
 
   private findArchitectureFiles(): string[] {
-    Logger.debug("Reading folder", archFolder)
+    Logger.debug('Reading folder', archFolder)
 
     const files = readdirSync(archFolder)
-    Logger.debug("Found the following files:", files)
+    Logger.debug('Found the following files:', files)
 
     return files.map(it => join(archFolder, it))
   }
 
   private readConfig(args: string[]): ArchlintConfig {
-    let [srcRoot, verboseString, ...others] = args
+    const [srcRoot, verboseString, ...others] = args
     if (!srcRoot) {
-      throw new Error("You need to pass the source-root as first argument")
+      throw new Error('You need to pass the source-root as first argument')
     }
 
     if (others.length > 0) {
-      throw new Error("Unexpected number of arguments")
+      throw new Error('Unexpected number of arguments')
     }
 
     let verbose = false

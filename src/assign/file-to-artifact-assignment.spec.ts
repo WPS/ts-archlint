@@ -1,6 +1,6 @@
-import {FileToArtifactAssignment} from "./file-to-artifact-assignment";
-import {ArtifactDescription} from "../describe/artifact-description";
-import {CodeFile} from "../parse/code-file";
+import {FileToArtifactAssignment} from './file-to-artifact-assignment'
+import {ArtifactDescription} from '../describe/artifact-description'
+import {CodeFile} from '../parse/code-file'
 
 describe(FileToArtifactAssignment.name, () => {
   let artifacts: ArtifactDescription[]

@@ -1,12 +1,12 @@
-import {DependencyViolation} from "./dependency-violation";
-import {ArchitectureDescription} from "../describe/architecture-description";
-import {Dependency} from "../parse/dependency";
-import {Artifact} from "./artifact";
-import {PathPattern} from "../assign/path-pattern";
-import {CodeFile} from "../parse/code-file";
-import {Logger} from "../common/logger";
-import {FileToArtifactAssignment} from "../assign/file-to-artifact-assignment";
-import {CheckResult} from "./check-result";
+import {DependencyViolation} from './dependency-violation'
+import {ArchitectureDescription} from '../describe/architecture-description'
+import {Dependency} from '../parse/dependency'
+import {Artifact} from './artifact'
+import {PathPattern} from '../assign/path-pattern'
+import {CodeFile} from '../parse/code-file'
+import {Logger} from '../common/logger'
+import {FileToArtifactAssignment} from '../assign/file-to-artifact-assignment'
+import {CheckResult} from './check-result'
 
 export class DependencyChecker {
   private readonly artifactsByNames = new Map<string, Artifact>()
@@ -28,15 +28,15 @@ export class DependencyChecker {
 
   checkAll(files: CodeFile[]): CheckResult {
     if (this.assignment.getEmptyArtifacts().length > 0) {
-      throw "Empty artifacts:\n"
-      + this.assignment.getEmptyArtifacts().map(it => "  - '" + it + "'").join(', ')
+      throw 'Empty artifacts:\n'
+      + this.assignment.getEmptyArtifacts().map(it => '  - \'' + it + '\'').join(', ')
     }
 
     const violations: DependencyViolation[] = []
 
     let dependencies = 0
     for (const file of files) {
-      dependencies += this.checkFile(file, violations);
+      dependencies += this.checkFile(file, violations)
     }
 
     return {
@@ -57,27 +57,27 @@ export class DependencyChecker {
       }
       count++
     }
-    return count;
+    return count
   }
 
   checkDependency(filePath: string, dependency: Dependency): DependencyViolation | undefined {
-    Logger.debug("Checking " + filePath + " -> " + dependency.path)
+    Logger.debug('Checking ' + filePath + ' -> ' + dependency.path)
 
     if (this.globalIncludes.length > 0) {
       if (this.globalIncludes.every(it => !it.matches(filePath) || !it.matches(dependency.path))) {
-        Logger.debug("Not globally included -> OK")
+        Logger.debug('Not globally included -> OK')
         return undefined
       }
     }
 
     if (this.globalExcludes.some(it => it.matches(filePath) || it.matches(dependency.path))) {
-      Logger.debug("Globally excluded -> OK")
+      Logger.debug('Globally excluded -> OK')
       return undefined
     }
 
     const from = this.findArtifact(filePath)
     if (!from) {
-      Logger.debug("Not described -> OK")
+      Logger.debug('Not described -> OK')
       // files that are not described are not checked
       return undefined
     }
@@ -132,6 +132,6 @@ export class DependencyChecker {
   }
 
   private failedBecauseUnassigned(): boolean {
-    return (this.description.failOnUnassigned ?? false) && this.assignment.getUnassignedPaths().length > 0;
+    return (this.description.failOnUnassigned ?? false) && this.assignment.getUnassignedPaths().length > 0
   }
 }

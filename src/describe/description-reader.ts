@@ -1,7 +1,7 @@
-import {ArchitectureDescription} from "./architecture-description";
+import {ArchitectureDescription} from './architecture-description'
 
 import schema from '../schema.json'
-import {Validator} from "jsonschema";
+import {Validator} from 'jsonschema'
 
 export class DescriptionReader {
   readDescription(fileContent: string): ArchitectureDescription {
