@@ -160,11 +160,11 @@ describe(DependencyChecker.name, () => {
       expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/package/dependency.ts')).toBeNull()
     })
 
-    it('should list check dependency for not ignored files', () => {
+    it('should check dependency for not ignored files', () => {
       expect(getViolation('b/with/violation.ts', 'a/ignored/dependency.ts')).not.toBeNull()
     })
 
-    it('should not list as ignored Dependency as violation', () => {
+    it('should not list ignored Dependency as violation', () => {
       expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/dependency.ts')).toBeNull()
       expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/other/dependency.ts')).toBeNull()
     })
