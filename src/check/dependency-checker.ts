@@ -10,6 +10,7 @@ import { DependencyParser } from '../parse/dependency-parser'
 
 export class DependencyChecker {
   private readonly artifactsByNames = new Map<string, Artifact>()
+  private readonly ignoreDependencies = new Map<PathPattern, PathPattern[]>()
   private globalExcludes: PathPattern[]
   private globalIncludes: PathPattern[]
 
@@ -26,6 +27,14 @@ export class DependencyChecker {
     this.globalIncludes = (description.include ?? []).map(
       (it) => new PathPattern(it)
     )
+    if (description.ignoreDependencies) {
+      Object.keys(description.ignoreDependencies).forEach(sourcePath => {
+        const dependencies = Array.isArray(description.ignoreDependencies![sourcePath]) ?
+          (description.ignoreDependencies![sourcePath] as string[]).map(p => new PathPattern(p)) :
+          [new PathPattern(description.ignoreDependencies![sourcePath] as string)]
+        this.ignoreDependencies.set(new PathPattern(sourcePath), dependencies)
+      })
+    }
   }
 
   private addArtifact(artifact: Artifact): void {
@@ -117,6 +126,15 @@ export class DependencyChecker {
       Logger.debug('Not described -> OK')
       // files that are not described are not checked
       return undefined
+    }
+
+    for (const [sourcePath, ignoreDependencies] of this.ignoreDependencies.entries()) {
+      if (sourcePath.matches(filePath)) {
+        if (ignoreDependencies.some(dep => dep.matches(dependency.path))) {
+          Logger.debug('Ignored -> OK')
+          return undefined
+        }
+      }
     }
 
     const to = this.findArtifact(dependency.path)

@@ -115,6 +115,65 @@ describe(DependencyChecker.name, () => {
     })
   })
 
+  describe('with ignored dependencies', () => {
+    beforeEach(() => {
+      const artifactA = {
+        name: 'A',
+        include: 'a/**',
+        mayUse: 'B'
+      }
+      const artifactB = {
+        name: 'B',
+        include: 'b/**',
+      }
+      architecture = {
+        name: 'TestArchitecture',
+        ignoreDependencies: {
+          'b/with/ignored/violation.ts':
+            ['a/ignored/dependency.ts', 'a/ignored/other/dependency.ts', 'a/ignored/package/**'],
+          'b/legacy/package**': ['a/ignored/dependency.ts', 'a/ignored/other/dependency.ts']
+        },
+        artifacts: [
+          artifactA,
+          artifactB,
+        ]
+      }
+
+      assignment.findArtifact = (it) => {
+        if (it.startsWith('a')) {
+          return artifactA.name
+        } else if (it.startsWith('b')) {
+          return artifactB.name
+        } else {
+          return null
+        }
+      }
+
+      checker = new DependencyChecker(architecture, assignment)
+    })
+
+    it('should match Path Pattern for source Path', () => {
+      expect(getViolation('b/legacy/package/test.ts', 'a/ignored/dependency.ts')).toBeNull()
+    })
+
+    it('should match Path Pattern for dependency Path', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/package/dependency.ts')).toBeNull()
+    })
+
+    it('should list check dependency for not ignored files', () => {
+      expect(getViolation('b/with/violation.ts', 'a/ignored/dependency.ts')).not.toBeNull()
+    })
+
+    it('should not list as ignored Dependency as violation', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/dependency.ts')).toBeNull()
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/other/dependency.ts')).toBeNull()
+    })
+
+    it('should find other violations within file', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/other/dependency.ts')).not.toBeNull()
+    })
+  })
+
   describe('with a nested architecture', function () {
     beforeEach(() => {
       architecture = {
