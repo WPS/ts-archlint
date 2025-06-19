@@ -28,7 +28,7 @@ export class ArchlintCli {
     const startTime = performance.now()
     Logger.info('Archlint started, analyzing architecture...')
 
-    const [nodePath, jsPath, ...args] = process.argv
+    const [_nodePath, _jsPath, ...args] = process.argv
 
     const config = this.readConfig(args)
     Logger.setVerbose(config.verbose || false)

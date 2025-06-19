@@ -13,8 +13,11 @@ export default [
       '@stylistic': stylistic,
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'off',
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/comma-dangle': [
@@ -31,7 +34,7 @@ export default [
       ],
       '@stylistic/array-bracket-spacing': ['error', 'never', { 'objectsInArrays': true } ],
       '@stylistic/max-len': ['error', 120, 2],
-      '@stylistic/eol-last': ['error','never'],
+      '@stylistic/eol-last': ['error','always'],
       '@stylistic/key-spacing': ['error',{} ]
     }
   },

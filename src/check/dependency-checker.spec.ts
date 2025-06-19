@@ -3,7 +3,6 @@ import { ArchitectureDescription } from '../describe/architecture-description'
 import { DependencyViolation } from './dependency-violation'
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { DependencyParser } from '../parse/dependency-parser'
-import { Dependency } from '../parse/dependency'
 
 describe(DependencyChecker.name, () => {
   let architecture: ArchitectureDescription
@@ -13,7 +12,7 @@ describe(DependencyChecker.name, () => {
 
   beforeEach(() => {
     assignment = {} as FileToArtifactAssignment
-    assignment.findArtifact = (it) => null
+    assignment.findArtifact = () => null
     assignment.getUnassignedPaths = () => []
     assignment.getEmptyArtifacts = () => []
   })
@@ -64,6 +63,7 @@ describe(DependencyChecker.name, () => {
           mockCheckFile.mock.calls[index][1]['tsConfigImportRemaps']
         ).toEqual(tsConfigImportRemaps)
       })
+      expect(assignment).not.toBeNull()
       expect(rest).toEqual({
         architectureName: 'TestArchitecture',
         dependencies: 2,
@@ -73,11 +73,7 @@ describe(DependencyChecker.name, () => {
     })
 
     it('should parse file and check each dependency', () => {
-      const mockCheckDependency = jest.fn(
-        (filePath: string, dependency: Dependency) => {
-          return undefined
-        }
-      )
+      const mockCheckDependency = jest.fn(() => undefined)
       checker.checkDependency = mockCheckDependency
 
       const testFilePath = 'test'
@@ -109,11 +105,11 @@ describe(DependencyChecker.name, () => {
       expect(mockParse.mock.calls).toHaveLength(1)
       expect(mockParse.mock.calls[0][0]).toBe(testFilePath)
       expect(mockCheckDependency.mock.calls).toHaveLength(2)
-      expect(mockCheckDependency.mock.calls.map((call) => call[0])).toEqual([
+      expect(mockCheckDependency.mock.calls.map((call) => (call as any)[0])).toEqual([
         testFilePath,
         testFilePath
       ])
-      expect(mockCheckDependency.mock.calls.map((call) => call[1])).toEqual(
+      expect(mockCheckDependency.mock.calls.map((call) => (call as any)[1])).toEqual(
         codeFile.dependencies
       )
     })

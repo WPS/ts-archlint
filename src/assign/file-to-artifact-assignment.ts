@@ -1,6 +1,5 @@
 import {ArtifactDescription} from '../describe/artifact-description'
 import {PathPattern} from './path-pattern'
-import {CodeFile} from '../parse/code-file'
 import {ArchitectureDescription} from '../describe/architecture-description'
 
 interface ArtifactWithInclude {
