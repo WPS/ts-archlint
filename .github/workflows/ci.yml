@@ -1,0 +1,33 @@
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: CI
+
+on: ['push']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+      - run: npm run archlint
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.event.ref, 'refs/tags/')
+    steps:
+      - run: echo "Would release version ${{  github.ref_name }}"
+      - run: sed -i "s/0.0.0-SNAPSHOT/${{ github.ref_name }}/" package.json
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - run: npm publish --provenance --access public
