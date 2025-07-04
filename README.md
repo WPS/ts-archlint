@@ -77,7 +77,7 @@ The error output aims to be as clear and concise as possible
 
 ## Ignoring dependency violations
 
-Dependencies can be temporarily ignored as follows:
+Violations can be temporarily ignored as follows:
 
 ```
 "ignoreDependencies": {
