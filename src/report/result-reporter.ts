@@ -1,9 +1,10 @@
-import {DependencyViolation} from '../check/dependency-violation'
-import {Logger} from '../common/logger'
-import {FileToArtifactAssignment} from '../assign/file-to-artifact-assignment'
-import {CheckResult} from '../check/check-result'
+import { DependencyViolation } from '../check/dependency-violation'
+import { Logger } from '../common/logger'
+import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
+import { CheckResult } from '../check/check-result'
 
 const reportNumberOfUnassignedFiles = 15
+const reportNumberOfIgnoredArtifacts = 5
 const divider = '__________________________________________________________________________________'
 
 function logWithFrame(text: string): void {
@@ -24,13 +25,19 @@ export class ResultReporter {
   }
 
   private reportViolations(violations: DependencyViolation[]): void {
-    if (violations.length === 0) {
-      return
-    }
-
     const grouped = new Map<string, string[]>()
-    for (const {from, to} of violations) {
-      const key = `artifact ${from.artifact} => ${to.artifact || '<unknown-artifact>'}`
+    let ignoredCount: number = 0
+    const ignoredArtifacts = new Set<string>()
+
+    for (const { from, to, ignored } of violations) {
+      const key = `${from.artifact} => ${to.artifact || '<unknown-artifact>'}`
+      const violationOutput = `  ${this.formatPath(from.path, from.line)} => ${this.formatPath(to.path)}`
+
+      if (ignored) {
+        ignoredArtifacts.add(key)
+        ignoredCount++
+        continue
+      }
 
       let existing = grouped.get(key)
       if (!existing) {
@@ -38,13 +45,30 @@ export class ResultReporter {
         grouped.set(key, existing)
       }
 
-      existing.push(`  ${this.formatPath(from.path, from.line)} => ${this.formatPath(to.path)}`)
+      existing.push(violationOutput)
     }
 
     for (const [artifact, artifactViolations] of grouped.entries()) {
-      logWithFrame(`${artifact} (${artifactViolations.length})`)
+      logWithFrame(`artifact ${artifact} (${artifactViolations.length})`)
       for (const violation of artifactViolations) {
         logWithFrame(violation)
+      }
+    }
+
+    if (ignoredCount > 0) {
+      logWithFrame('')
+
+      logWithFrame(`${ignoredCount} violations where ignored between the following artifacts`)
+      let count = 0
+      for (const ignoredArtifact of ignoredArtifacts) {
+        count++
+
+        if (count > reportNumberOfIgnoredArtifacts) {
+          logWithFrame('  [...]')
+          break
+        }
+
+        logWithFrame(`  ${ignoredArtifact}`)
       }
     }
   }
@@ -56,12 +80,13 @@ export class ResultReporter {
       let count = 0
       for (const file of unassignedFiles) {
         count++
-        logWithFrame(`  ${file}`)
 
-        if (count === reportNumberOfUnassignedFiles) {
+        if (count > reportNumberOfUnassignedFiles) {
           logWithFrame('  [...]')
           break
         }
+
+        logWithFrame(`  ${file}`)
       }
     }
   }

@@ -66,7 +66,11 @@ export class ArchlintCli {
       const result = checker.checkAll(config.srcRoot, filesToCheck)
       reporter.reportResults(result)
 
-      if (result.violations.length > 0 || result.failedBecauseUnassigned) {
+      const nonIgnoredViolationCount = result.violations
+        .filter(it => !it.ignored)
+        .length
+
+      if (nonIgnoredViolationCount || result.failedBecauseUnassigned) {
         returnCode = 1
       }
     }

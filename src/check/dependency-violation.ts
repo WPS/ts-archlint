@@ -7,4 +7,5 @@ interface ViolationEdge {
 export interface DependencyViolation {
   from: ViolationEdge & { line: number, artifact: string }
   to: ViolationEdge
+  ignored?: boolean
 }

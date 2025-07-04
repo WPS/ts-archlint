@@ -128,15 +128,6 @@ export class DependencyChecker {
       return undefined
     }
 
-    for (const [sourcePath, ignoreDependencies] of this.ignoreDependencies.entries()) {
-      if (sourcePath.matches(filePath)) {
-        if (ignoreDependencies.some(dep => dep.matches(dependency.path))) {
-          Logger.debug('Ignored -> OK')
-          return undefined
-        }
-      }
-    }
-
     const to = this.findArtifact(dependency.path)
 
     if (!to) {
@@ -173,6 +164,8 @@ export class DependencyChecker {
     from: Artifact,
     to?: Artifact
   ): DependencyViolation {
+    const ignored = this.isViolationIgnored(path, dependency)
+
     return {
       from: {
         artifact: from.name,
@@ -182,14 +175,24 @@ export class DependencyChecker {
       to: {
         artifact: to?.name || null,
         path: dependency.path
-      }
+      },
+      ignored
     }
   }
 
   private failedBecauseUnassigned(): boolean {
-    return (
-      (this.description.failOnUnassigned ?? false) &&
-      this.assignment.getUnassignedPaths().length > 0
-    )
+    return (this.description.failOnUnassigned ?? false)
+      && this.assignment.getUnassignedPaths().length > 0
+  }
+
+  private isViolationIgnored(fromPath: string, dependency: Dependency): boolean {
+    for (const [sourcePath, ignoreDependencies] of this.ignoreDependencies.entries()) {
+      if (sourcePath.matches(fromPath)) {
+        if (ignoreDependencies.some(dep => dep.matches(dependency.path))) {
+          return true
+        }
+      }
+    }
+    return false
   }
 }
