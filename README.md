@@ -2,6 +2,25 @@
 
 Simple linter for enforcing architecture rules in typescript.
 
+## Core principles
+
+### simple
+
+Only does what it needs to do, even if that means missing a few edge cases.
+
+### fast
+
+Adding archlint to a project should not measurably slow down an existing lint step.
+
+### strict
+
+Everything that is not explicitly allowed is forbidden.
+
+
+### concise
+
+The error output aims to be as clear and concise as possible
+
 ## Getting Started
 
 - Install via `npm install --save-dev ts-archlint`
