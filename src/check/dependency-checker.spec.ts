@@ -115,6 +115,65 @@ describe(DependencyChecker.name, () => {
     })
   })
 
+  describe('with ignored dependencies', () => {
+    beforeEach(() => {
+      const artifactA = {
+        name: 'A',
+        include: 'a/**',
+        mayUse: 'B'
+      }
+      const artifactB = {
+        name: 'B',
+        include: 'b/**',
+      }
+      architecture = {
+        name: 'TestArchitecture',
+        ignoreDependencies: {
+          'b/with/ignored/violation.ts':
+            ['a/ignored/dependency.ts', 'a/ignored/other/dependency.ts', 'a/ignored/package/**'],
+          'b/legacy/package**': ['a/ignored/dependency.ts', 'a/ignored/other/dependency.ts']
+        },
+        artifacts: [
+          artifactA,
+          artifactB,
+        ]
+      }
+
+      assignment.findArtifact = (it) => {
+        if (it.startsWith('a')) {
+          return artifactA.name
+        } else if (it.startsWith('b')) {
+          return artifactB.name
+        } else {
+          return null
+        }
+      }
+
+      checker = new DependencyChecker(architecture, assignment)
+    })
+
+    it('should match Path Pattern for source Path', () => {
+      expect(getViolation('b/legacy/package/test.ts', 'a/ignored/dependency.ts')?.ignored).toBe(true)
+    })
+
+    it('should match Path Pattern for dependency Path', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/package/dependency.ts')?.ignored).toBe(true)
+    })
+
+    it('should check dependency for not ignored files', () => {
+      expect(getViolation('b/with/violation.ts', 'a/ignored/dependency.ts')?.ignored).toBe(false)
+    })
+
+    it('should not list ignored Dependency as violation', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/dependency.ts')?.ignored).toBe(true)
+      expect(getViolation('b/with/ignored/violation.ts', 'a/ignored/other/dependency.ts')?.ignored).toBe(true)
+    })
+
+    it('should find other violations within file', () => {
+      expect(getViolation('b/with/ignored/violation.ts', 'a/other/dependency.ts')?.ignored).toBe(false)
+    })
+  })
+
   describe('with a nested architecture', function () {
     beforeEach(() => {
       architecture = {
@@ -289,7 +348,7 @@ describe(DependencyChecker.name, () => {
 
     it('should return violations correctly', () => {
       expect(getViolation('projects/included/one/file.ts', 'projects/included/two/file.ts')).toBeNull()
-      expect(getViolation('projects/included/two/file.ts', 'projects/included/one/file.ts')).not.toBeNull()
+      expect(getViolation('projects/included/two/file.ts', 'projects/included/one/file.ts')?.ignored).toBe(false)
 
       expect(getViolation('projects/included/one/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
       expect(getViolation('projects/included/two/file.ts', 'projects/included/exception/three/file.ts')).toBeNull()
@@ -297,10 +356,11 @@ describe(DependencyChecker.name, () => {
       expect(getViolation('projects/included/one/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
       expect(getViolation('projects/included/two/file.ts', 'projects/excluded/three/file.ts')).toBeNull()
 
-      expect(getViolation('projects/included/one/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
-      expect(getViolation('projects/included/two/file.ts', 'projects/included/three/file.ts')).not.toBeNull()
+      expect(getViolation('projects/included/one/file.ts', 'projects/included/three/file.ts')?.ignored).toBe(false)
+      expect(getViolation('projects/included/two/file.ts', 'projects/included/three/file.ts')?.ignored).toBe(false)
     })
   })
+
 
   function expectViolation(
     fromArtifact: string,

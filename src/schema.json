@@ -33,6 +33,13 @@
       "description": "Additional paths from tsconfig.json, mapped path must be relative to rootPath",
       "additionalProperties": { "type": "string" }
     },
+    "ignoreDependencies": {
+      "type": "object",
+      "description": "Dependencies to be ignored when checking for violations",
+      "additionalProperties": {
+        "$ref": "#/definitions/StringOrStringArray"
+      }
+    },
     "artifacts": {
       "type": "array",
       "items": {

@@ -66,7 +66,11 @@ export class ArchlintCli {
       const result = checker.checkAll(config.srcRoot, filesToCheck)
       reporter.reportResults(result)
 
-      if (result.violations.length > 0 || result.failedBecauseUnassigned) {
+      const nonIgnoredViolationCount = result.violations
+        .filter(it => !it.ignored)
+        .length
+
+      if (nonIgnoredViolationCount || result.failedBecauseUnassigned) {
         returnCode = 1
       }
     }
@@ -87,18 +91,18 @@ export class ArchlintCli {
   private readConfig(args: string[]): ArchlintConfig {
     const [srcRoot, verboseString, ...others] = args
     if (!srcRoot) {
-      throw new Error('You need to pass the source-root as first argument')
+      throw 'You need to pass the source-root as first argument'
     }
 
     if (others.length > 0) {
-      throw new Error('Unexpected number of arguments')
+      throw 'Unexpected number of arguments'
     }
 
     let verbose = false
     if (verboseString === '-v' || verboseString === '--verbose') {
       verbose = true
     } else if (verboseString) {
-      throw new Error(`Unexpected parameter: '${verboseString}'`)
+      throw `Unexpected parameter: '${verboseString}'`
     }
 
     return {
