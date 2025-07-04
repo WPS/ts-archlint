@@ -74,3 +74,23 @@ The error output aims to be as clear and concise as possible
   ]
 }
 ```
+
+## Ignoring dependency violations
+
+Dependencies can be temporarily ignored as follows:
+
+```
+"ignoreDependencies": {
+  "one/module/file1.ts": "other/module/file2.ts",
+  "one/module/file3.ts": "other/module/**",
+  "one/module/**": [
+    "other/module/file1.ts",
+    "other/module/folder/*"
+  ]
+},
+```
+
+This ignores all violations in the direction they are stated (left to right is ignored, the other way would have to be
+explicitly stated).
+
+Patterns can be used on both sides (* matches anything except slashes, ** matches anything).
