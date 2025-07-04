@@ -43,10 +43,7 @@ export class DependencyParser {
 
   /**
    * parses import statements und resolves dependencies
-   * @param sourcePath directory path to resolve relative import paths (with forward slashes)
-   * @param fileContent
-   * @param tsConfigImportRemaps
-   * @returns
+   * sourcePath => directory path to resolve relative import paths (with forward slashes)
    */
   private parseDependencies(
     sourcePath: string,
@@ -97,7 +94,7 @@ export class DependencyParser {
     return [result, lineNumber]
   }
 
-  remapImports(path: string, tsConfigImportRemaps: ImportRemaps): string {
+  private remapImports(path: string, tsConfigImportRemaps: ImportRemaps): string {
     let result = path
     Object.keys(tsConfigImportRemaps).forEach((matchPath) => {
       result = result.replace(

@@ -27,11 +27,14 @@ export class DependencyChecker {
     this.globalIncludes = (description.include ?? []).map(
       (it) => new PathPattern(it)
     )
+
     if (description.ignoreDependencies) {
       Object.keys(description.ignoreDependencies).forEach(sourcePath => {
-        const dependencies = Array.isArray(description.ignoreDependencies![sourcePath]) ?
-          (description.ignoreDependencies![sourcePath] as string[]).map(p => new PathPattern(p)) :
-          [new PathPattern(description.ignoreDependencies![sourcePath] as string)]
+        const ignoreEntry = description.ignoreDependencies![sourcePath]
+
+        const dependencies = Array.isArray(ignoreEntry)
+          ? ignoreEntry.map(p => new PathPattern(p))
+          : [new PathPattern(ignoreEntry)]
         this.ignoreDependencies.set(new PathPattern(sourcePath), dependencies)
       })
     }
