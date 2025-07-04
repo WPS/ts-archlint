@@ -1,7 +1,7 @@
-import {ArchitectureDescription} from './architecture-description'
+import { ArchitectureDescription } from './architecture-description'
 
 import schema from '../schema.json'
-import {Validator} from 'jsonschema'
+import { Validator } from 'jsonschema'
 
 export class DescriptionReader {
   readDescription(fileContent: string): ArchitectureDescription {
@@ -9,7 +9,7 @@ export class DescriptionReader {
     const validationResult = new Validator().validate(description, schema as any)
 
     if (!validationResult.valid) {
-      throw new Error(validationResult.toString())
+      throw validationResult.toString()
     }
 
     return description

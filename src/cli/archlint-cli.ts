@@ -91,18 +91,18 @@ export class ArchlintCli {
   private readConfig(args: string[]): ArchlintConfig {
     const [srcRoot, verboseString, ...others] = args
     if (!srcRoot) {
-      throw new Error('You need to pass the source-root as first argument')
+      throw 'You need to pass the source-root as first argument'
     }
 
     if (others.length > 0) {
-      throw new Error('Unexpected number of arguments')
+      throw 'Unexpected number of arguments'
     }
 
     let verbose = false
     if (verboseString === '-v' || verboseString === '--verbose') {
       verbose = true
     } else if (verboseString) {
-      throw new Error(`Unexpected parameter: '${verboseString}'`)
+      throw `Unexpected parameter: '${verboseString}'`
     }
 
     return {

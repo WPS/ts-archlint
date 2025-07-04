@@ -152,7 +152,7 @@ export class DependencyChecker {
     const artifact = this.artifactsByNames.get(name)
 
     if (!artifact) {
-      throw new Error(`Unexpected artifact: '${name}'`)
+      throw `Unexpected artifact: '${name}'`
     }
 
     return artifact
@@ -165,6 +165,7 @@ export class DependencyChecker {
     to?: Artifact
   ): DependencyViolation {
     const ignored = this.isViolationIgnored(path, dependency)
+
 
     return {
       from: {
