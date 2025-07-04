@@ -7,14 +7,14 @@ describe(DependencyParser.name, () => {
   let fileContent: string
   let parser: DependencyParser
   const tsConfigImportRemaps: ImportRemaps = {
-    'mapped-import-path': 'my-mapped-import-path'
+    'mapped-import-path': 'target/of/mapping'
   }
 
   beforeEach(() => {
     parser = new DependencyParser(
       '/long/path/prefix',
       tsConfigImportRemaps,
-      (it) => {
+      it => {
         expect(it).toBe(`/long/path/prefix/${filePath}`)
         return fileContent
       }
@@ -65,7 +65,7 @@ describe(DependencyParser.name, () => {
         },
         {
           line: 4,
-          path: 'node_modules:external-lib'
+          path: 'node_modules/external-lib'
         }
       ]
     }
@@ -141,7 +141,7 @@ describe(DependencyParser.name, () => {
         dependencies: [
           {
             line: 1,
-            path: 'node_modules:external-library/test'
+            path: 'node_modules/external-library/test'
           }
         ]
       }
@@ -150,25 +150,21 @@ describe(DependencyParser.name, () => {
     })
 
     it('should NOT prefix absolute dependencies included in tsConfigImportRemaps', () => {
-      const mappedImportPath = Object.keys(tsConfigImportRemaps)[0]
-      fileContent = `import { blubb } from "${mappedImportPath}/test";`
+      fileContent = 'import { blubb } from "mapped-import-path/test";'
 
       const parsed = parser.parseTypescriptFile(filePath)
 
-      expect(parsed.dependencies[0].path.startsWith('node_modules')).toBe(
-        false
-      )
+      expect(parsed.dependencies[0].path).toBe('target/of/mapping/test.ts')
     })
   })
 
   it('should replace paths included in tsConfigImportRemaps', () => {
-    const mappedImportPath = Object.keys(tsConfigImportRemaps)[0]
-    fileContent = `import { blubb } from "${mappedImportPath}/test";`
+    fileContent = 'import { blubb } from "mapped-import-path/test";'
 
     const parsed = parser.parseTypescriptFile(filePath)
 
-    expect(parsed.dependencies[0].path).toEqual(
-      `${tsConfigImportRemaps[mappedImportPath]}/test.ts`
+    expect(parsed.dependencies[0].path).toBe(
+      'target/of/mapping/test.ts'
     )
   })
 

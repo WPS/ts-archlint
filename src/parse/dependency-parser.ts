@@ -115,7 +115,7 @@ export class DependencyParser {
       !path.startsWith('.') &&
       !skipNodeModulePrefixFor.some((skipPath) => path.startsWith(skipPath))
     ) {
-      return 'node_modules:' + path
+      return 'node_modules/' + path
     }
 
     let absolutePathFromSource
