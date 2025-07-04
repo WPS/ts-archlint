@@ -8,6 +8,7 @@ export interface ArchitectureDescription {
   include?: string[]
   exclude?: string[]
   failOnUnassigned?: boolean
+  ignoreArtifactCycles?: boolean
   tsConfigImportRemaps?: ImportRemaps
   ignoreDependencies?: DependencyMapping;
   artifacts: ArtifactDescription[]

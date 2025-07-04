@@ -8,6 +8,7 @@ import { ArchitectureDescription } from '../describe/architecture-description'
 import { ArchlintConfig } from '../describe/archlint-config'
 import { DescriptionReader } from '../describe/description-reader'
 import { ResultReporter } from '../report/result-reporter'
+import { CycleDetector } from '../check/cycle-detector'
 
 const archFolder = '.archlint'
 
@@ -53,7 +54,7 @@ export class ArchlintCli {
         description,
         filesToCheck
       )
-      checkers.push(new DependencyChecker(description, assignment))
+      checkers.push(new DependencyChecker(description, assignment, new CycleDetector()))
     }
 
     Logger.debug(`Read ${checkers.length} dependency checkers`)

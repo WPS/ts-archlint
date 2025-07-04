@@ -1,5 +1,5 @@
-import {ArtifactDescription} from '../describe/artifact-description'
-import {Logger} from '../common/logger'
+import { ArtifactDescription } from '../describe/artifact-description'
+import { Logger } from '../common/logger'
 
 export class Artifact {
   readonly name: string
@@ -52,7 +52,7 @@ export class Artifact {
   }
 
   mayUse({name}: Artifact): boolean {
-    return [...this.mayUseArtifacts].some(it => name.startsWith(it))
+    return this.mayUseArtifacts.some(it => name.startsWith(it))
   }
 
   private allowUsageIncludingChildren(other: Artifact): void {

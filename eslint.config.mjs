@@ -20,18 +20,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/quotes': ['error', 'single'],
-      '@stylistic/comma-dangle': [
-        'error',
-        {
-          arrays: 'only-multiline',
-          objects: 'only-multiline',
-          imports: 'never',
-          exports: 'never',
-          functions: 'never',
-          importAttributes: 'never',
-          dynamicImports: 'never'
-        },
-      ],
+      '@stylistic/comma-dangle': 'off',
       '@stylistic/array-bracket-spacing': ['error', 'never', { 'objectsInArrays': true } ],
       '@stylistic/max-len': ['error', 120, 2],
       '@stylistic/eol-last': ['error','always'],

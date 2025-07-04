@@ -3,14 +3,18 @@ import { ArchitectureDescription } from '../describe/architecture-description'
 import { DependencyViolation } from './dependency-violation'
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { DependencyParser } from '../parse/dependency-parser'
+import { CycleDetector } from './cycle-detector'
 
 describe(DependencyChecker.name, () => {
   let architecture: ArchitectureDescription
 
   let assignment: FileToArtifactAssignment
   let checker: DependencyChecker
+  let cycleDetector: CycleDetector
 
   beforeEach(() => {
+    cycleDetector = new CycleDetector()
+
     assignment = {} as FileToArtifactAssignment
     assignment.findArtifact = () => null
     assignment.getUnassignedPaths = () => []
@@ -32,7 +36,7 @@ describe(DependencyChecker.name, () => {
         ]
       }
 
-      checker = new DependencyChecker(architecture, assignment)
+      checker = new DependencyChecker(architecture, assignment, cycleDetector)
     })
 
     it('should throw on empty artifacts', () => {
@@ -149,7 +153,7 @@ describe(DependencyChecker.name, () => {
         }
       }
 
-      checker = new DependencyChecker(architecture, assignment)
+      checker = new DependencyChecker(architecture, assignment, cycleDetector)
     })
 
     it('should match Path Pattern for source Path', () => {
@@ -228,7 +232,7 @@ describe(DependencyChecker.name, () => {
         ]
       }
 
-      checker = new DependencyChecker(architecture, assignment)
+      checker = new DependencyChecker(architecture, assignment, cycleDetector)
     })
 
     it('should NOT report non violating dependencies', () => {
@@ -281,7 +285,7 @@ describe(DependencyChecker.name, () => {
         ]
       }
 
-      checker = new DependencyChecker(architecture, assignment)
+      checker = new DependencyChecker(architecture, assignment, cycleDetector)
     })
 
     it('should report violations', () => {
@@ -343,7 +347,7 @@ describe(DependencyChecker.name, () => {
 
       assignment.findArtifact = findArtifactsByInclude(['one', 'two', 'three'])
 
-      checker = new DependencyChecker(architecture, assignment)
+      checker = new DependencyChecker(architecture, assignment, cycleDetector)
     })
 
     it('should return violations correctly', () => {

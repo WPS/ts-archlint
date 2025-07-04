@@ -7,6 +7,7 @@ import { Logger } from '../common/logger'
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { CheckResult } from './check-result'
 import { DependencyParser } from '../parse/dependency-parser'
+import { CycleDetector } from './cycle-detector'
 
 export class DependencyChecker {
   private readonly artifactsByNames = new Map<string, Artifact>()
@@ -16,11 +17,13 @@ export class DependencyChecker {
 
   constructor(
     private description: ArchitectureDescription,
-    private assignment: FileToArtifactAssignment
+    private assignment: FileToArtifactAssignment,
+    private cycleDetector: CycleDetector,
   ) {
-    Artifact.createFrom(description.artifacts).forEach((it) =>
-      this.addArtifact(it)
-    )
+    const artifacts = Artifact.createFrom(description.artifacts)
+    this.throwIfCycleDetected(artifacts)
+
+    artifacts.forEach((it) => this.addArtifact(it))
     this.globalExcludes = (description.exclude ?? []).map(
       (it) => new PathPattern(it)
     )
@@ -37,6 +40,22 @@ export class DependencyChecker {
           : [new PathPattern(ignoreEntry)]
         this.ignoreDependencies.set(new PathPattern(sourcePath), dependencies)
       })
+    }
+  }
+
+  private throwIfCycleDetected(artifacts: Artifact[]) {
+    const cycle = this.cycleDetector.findCycle(artifacts)
+    if (!cycle) {
+      return
+    }
+
+    const message = `Cycle between artifacts detected: ${cycle.join(' => ')}`
+
+    if (this.description.ignoreArtifactCycles === false) {
+      // opt in for now
+      throw message
+    } else {
+      Logger.info(`${message}, but cycle is ignored`)
     }
   }
 
@@ -106,9 +125,7 @@ export class DependencyChecker {
 
     if (this.globalIncludes.length > 0) {
       if (
-        this.globalIncludes.every(
-          (it) => !it.matches(filePath) || !it.matches(dependency.path)
-        )
+        this.globalIncludes.every(it => !it.matches(filePath) || !it.matches(dependency.path))
       ) {
         Logger.debug('Not globally included -> OK')
         return undefined
@@ -116,9 +133,7 @@ export class DependencyChecker {
     }
 
     if (
-      this.globalExcludes.some(
-        (it) => it.matches(filePath) || it.matches(dependency.path)
-      )
+      this.globalExcludes.some(it => it.matches(filePath) || it.matches(dependency.path))
     ) {
       Logger.debug('Globally excluded -> OK')
       return undefined
@@ -168,7 +183,6 @@ export class DependencyChecker {
     to?: Artifact
   ): DependencyViolation {
     const ignored = this.isViolationIgnored(path, dependency)
-
 
     return {
       from: {

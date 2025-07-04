@@ -28,6 +28,9 @@
     "failOnUnassigned": {
       "type": "boolean"
     },
+    "ignoreArtifactCycles": {
+      "type": "boolean"
+    },
     "tsConfigImportRemaps": {
       "type": "object",
       "description": "Additional paths from tsconfig.json, mapped path must be relative to rootPath",
@@ -111,7 +114,8 @@
           },
           "additionalItems": false
         }
-      ]
+      ],
+      "additionalItems": false
     }
   }
 }
