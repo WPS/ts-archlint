@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -eou pipefail
 
 VERSION="$1"
