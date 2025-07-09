@@ -49,13 +49,12 @@ export class DependencyChecker {
       return
     }
 
-    const message = `Cycle between artifacts detected: ${cycle.join(' => ')}`
+    const message = `Cycle between artifacts detected: [${cycle.join(' => ')}]`
 
-    if (this.description.ignoreArtifactCycles === false) {
-      // opt in for now
-      throw message
-    } else {
+    if (this.description.ignoreArtifactCycles) {
       Logger.info(`${message}, but cycle is ignored`)
+    } else {
+      throw `${message}, can be ignored via "ignoreArtifactCycles": true`
     }
   }
 
@@ -84,7 +83,7 @@ export class DependencyChecker {
 
     const violations: DependencyViolation[] = []
 
-    const dependencyCounter = { count: 0 }
+    const dependencyCounter = {count: 0}
     for (const filePath of filePaths) {
       violations.push(
         ...this.checkFile(filePath, dependencyParser, dependencyCounter)
