@@ -1,4 +1,4 @@
-#!/bin/env node
+#!/usr/bin/env node
 import {ArchlintCli} from './cli/archlint-cli'
 import * as process from 'process'
 
