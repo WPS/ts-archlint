@@ -15,7 +15,7 @@ export class ResultReporter {
   reportResults(result: CheckResult): void {
     Logger.info(' _' + divider)
     logWithFrame(`Architecture [${result.architectureName}]`)
-    logWithFrame(`Analyzed ${result.dependencies} dependencies, found ${result.violations.length} violations`)
+    logWithFrame(`Found ${result.violations.length} violations`)
 
     this.reportViolations(result.violations)
     this.reportUnassignedFiles(result.assignment)
@@ -29,7 +29,7 @@ export class ResultReporter {
     let ignoredCount: number = 0
     const ignoredArtifacts = new Set<string>()
 
-    for (const { from, to, ignored } of violations) {
+    for (const {from, to, ignored} of violations) {
       const key = `${from.artifact} => ${to.artifact || '<unknown-artifact>'}`
       const violationOutput = `  ${this.formatPath(from.path, from.line)} => ${this.formatPath(to.path)}`
 

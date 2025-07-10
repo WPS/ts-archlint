@@ -1,10 +1,9 @@
 import { readFileSync } from 'fs'
-import { dirname, join } from 'path'
+import { join } from 'path'
 
 import { Logger } from '../common/logger'
-import { CodeFile } from './code-file'
-import { Dependency } from './dependency'
-import { ImportRemaps } from '../common/import-remaps'
+import { RawCodeFile } from './raw-code-file'
+import { RawDependency } from './raw-dependency'
 
 const regexFromImport = /from\s*['"](.+?)['"];?/
 const regexLazyImport = /import\(['"](.+?)['"]\)/
@@ -15,24 +14,20 @@ const defaultReadFile = (path: string) => readFileSync(path).toString()
 export class DependencyParser {
   constructor(
     private rootPath: string,
-    private tsConfigImportRemaps?: ImportRemaps,
     private read: (path: string) => string = defaultReadFile
-  ) {}
+  ) {
+  }
 
   /***
-   * @param path filepath relative to root with forward slashes
+   * @param filePath filepath relative to root with forward slashes
    */
-  parseTypescriptFile(path: string): CodeFile {
-    const pathFromRoot = this.toForwardSlashes(join(this.rootPath, path))
+  parseCodeFile(filePath: string): RawCodeFile {
+    const pathFromRoot = this.toForwardSlashes(join(this.rootPath, filePath))
     const content = this.read(pathFromRoot)
-    const [dependencies, lines] = this.parseDependencies(
-      dirname(path),
-      content,
-      this.tsConfigImportRemaps
-    )
+    const [dependencies, lines] = this.parseDependencies(content)
 
-    const codeFile: CodeFile = {
-      path,
+    const codeFile: RawCodeFile = {
+      path: filePath,
       lines,
       dependencies
     }
@@ -45,12 +40,8 @@ export class DependencyParser {
    * parses import statements und resolves dependencies
    * sourcePath => directory path to resolve relative import paths (with forward slashes)
    */
-  private parseDependencies(
-    sourcePath: string,
-    fileContent: string,
-    tsConfigImportRemaps?: ImportRemaps
-  ): [Dependency[], number] {
-    const result: Dependency[] = []
+  private parseDependencies(fileContent: string): [RawDependency[], number] {
+    const result: RawDependency[] = []
 
     const lines = fileContent.split(/\r?\n/)
     let lineNumber = 0
@@ -66,66 +57,14 @@ export class DependencyParser {
           continue
         }
 
-        let dependencyPath = path
-        if (tsConfigImportRemaps) {
-          dependencyPath = this.remapImports(
-            dependencyPath,
-            tsConfigImportRemaps
-          )
-        }
-
-        dependencyPath = this.toAbsoluteSourcePath(
-          sourcePath,
-          dependencyPath,
-          tsConfigImportRemaps
-            ? Object.keys(tsConfigImportRemaps).map(
-                (key) => tsConfigImportRemaps[key]
-              )
-            : []
-        )
-
         result.push({
           line: lineNumber,
-          path: dependencyPath
+          importFrom: path
         })
       }
     }
 
     return [result, lineNumber]
-  }
-
-  private remapImports(path: string, tsConfigImportRemaps: ImportRemaps): string {
-    let result = path
-    Object.keys(tsConfigImportRemaps).forEach((matchPath) => {
-      result = result.replace(
-        new RegExp(`^(\\/)?(${matchPath})(\\/)`),
-        `${tsConfigImportRemaps[matchPath]}/`
-      )
-    })
-
-    return result
-  }
-
-  private toAbsoluteSourcePath(
-    sourcePath: string,
-    path: string,
-    skipNodeModulePrefixFor: string[]
-  ): string {
-    if (
-      !path.startsWith('.') &&
-      !skipNodeModulePrefixFor.some((skipPath) => path.startsWith(skipPath))
-    ) {
-      return 'node_modules/' + path
-    }
-
-    let absolutePathFromSource
-    if (path.startsWith('.')) {
-      absolutePathFromSource = join(sourcePath, path)
-    } else {
-      absolutePathFromSource = path
-    }
-
-    return this.toForwardSlashes(absolutePathFromSource) + '.ts'
   }
 
   private toForwardSlashes(path: string): string {

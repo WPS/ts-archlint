@@ -6,8 +6,8 @@ import { PathPattern } from '../assign/path-pattern'
 import { Logger } from '../common/logger'
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { CheckResult } from './check-result'
-import { DependencyParser } from '../parse/dependency-parser'
 import { CycleDetector } from './cycle-detector'
+import { CodeFile } from '../parse/code-file'
 
 export class DependencyChecker {
   private readonly artifactsByNames = new Map<string, Artifact>()
@@ -65,7 +65,7 @@ export class DependencyChecker {
     }
   }
 
-  checkAll(rootPath: string, filePaths: string[]): CheckResult {
+  checkAll(files: CodeFile[]): CheckResult {
     if (this.assignment.getEmptyArtifacts().length > 0) {
       throw (
         'Empty artifacts:\n' +
@@ -76,42 +76,31 @@ export class DependencyChecker {
       )
     }
 
-    const dependencyParser = new DependencyParser(
-      rootPath,
-      this.description.tsConfigImportRemaps
-    )
-
     const violations: DependencyViolation[] = []
 
-    const dependencyCounter = {count: 0}
-    for (const filePath of filePaths) {
+    for (const file of files) {
       violations.push(
-        ...this.checkFile(filePath, dependencyParser, dependencyCounter)
+        ...this.checkFile(file)
       )
     }
 
     return {
       architectureName: this.description.name,
       violations,
-      dependencies: dependencyCounter.count,
       assignment: this.assignment,
       failedBecauseUnassigned: this.failedBecauseUnassigned()
     }
   }
 
-  public checkFile(
-    filePath: string,
-    dependencyParser: DependencyParser,
-    dependencyCounter: { count: number }
+  private checkFile(
+    file: CodeFile,
   ): DependencyViolation[] {
     const result: DependencyViolation[] = []
-    const file = dependencyParser.parseTypescriptFile(filePath)
     for (const dependency of file.dependencies) {
       const violation = this.checkDependency(file.path, dependency)
       if (violation) {
         result.push(violation)
       }
-      dependencyCounter.count++
     }
     return result
   }

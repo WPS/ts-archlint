@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'fs'
-import { join, relative } from 'path'
+import { join } from 'path'
 
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { DependencyChecker } from '../check/dependency-checker'
@@ -9,6 +9,9 @@ import { ArchlintConfig } from '../describe/archlint-config'
 import { DescriptionReader } from '../describe/description-reader'
 import { ResultReporter } from '../report/result-reporter'
 import { CycleDetector } from '../check/cycle-detector'
+import { DependencyParser } from '../parse/dependency-parser'
+import { PathNormalizer } from '../parse/path-normalizer'
+import { CodeFileReader } from '../parse/code-file-reader'
 
 const archFolder = '.archlint'
 
@@ -30,29 +33,33 @@ export class ArchlintCli {
     Logger.info('Archlint started, analyzing architecture...')
 
     const [_nodePath, _jsPath, ...args] = process.argv
-
     const config = this.readConfig(args)
     Logger.setVerbose(config.verbose || false)
-
     Logger.debug('Read the following config:', config)
+
+    const codeFileReader = new CodeFileReader(new DependencyParser(config.srcRoot))
+    const descriptionReader = new DescriptionReader()
 
     const checkers: DependencyChecker[] = []
     const archFiles = this.findArchitectureFiles()
 
-    const reader = new DescriptionReader()
-    const filesToCheck = this.findAllProjectFilesRecursively(
-      config.srcRoot,
-      config.srcRoot
+    const codeFiles = codeFileReader.readAll(config.srcRoot,)
+
+    const linesOfCode = codeFiles.map(it => it.lines)
+      .reduce((a, b) => a + b, 0)
+    const totalDependencies = codeFiles.map(it => it.dependencies.length)
+      .reduce((a, b) => a + b, 0)
+
+    Logger.info(
+      `Parsed ${codeFiles.length} files to check, ${linesOfCode} lines and ${totalDependencies} dependencies in total.`
     )
-    Logger.debug(`Found ${filesToCheck.length} files to check`)
 
     for (const archFile of archFiles) {
       const fileContent = readFileSync(archFile).toString()
-      const description: ArchitectureDescription =
-        reader.readDescription(fileContent)
+      const description: ArchitectureDescription = descriptionReader.readDescription(fileContent)
       const assignment = FileToArtifactAssignment.createFrom(
         description,
-        filesToCheck
+        codeFiles.map(it => it.path)
       )
       checkers.push(new DependencyChecker(description, assignment, new CycleDetector()))
     }
@@ -64,7 +71,9 @@ export class ArchlintCli {
     let returnCode = 0
 
     for (const checker of checkers) {
-      const result = checker.checkAll(config.srcRoot, filesToCheck)
+      const normalizer = new PathNormalizer()
+      const normalized = codeFiles.map(it => normalizer.normalize(it))
+      const result = checker.checkAll(normalized)
       reporter.reportResults(result)
 
       const nonIgnoredViolationCount = result.violations
@@ -110,32 +119,5 @@ export class ArchlintCli {
       srcRoot,
       verbose
     }
-  }
-
-  private findAllProjectFilesRecursively(
-    rootPath: string,
-    inDirectory: string
-  ): string[] {
-    Logger.debug(`searching files to check in directory ${inDirectory}`)
-    const result: string[] = []
-
-    const children = readdirSync(inDirectory, { withFileTypes: true })
-
-    for (const child of children) {
-      const childPath = join(inDirectory, child.name)
-      if (child.isDirectory()) {
-        result.push(
-          ...this.findAllProjectFilesRecursively(rootPath, childPath)
-        )
-      } else if (childPath.endsWith('.ts')) {
-        result.push(this.toForwardSlashes(relative(rootPath, childPath)))
-      }
-    }
-
-    return result
-  }
-
-  private toForwardSlashes(path: string): string {
-    return path.split('\\').join('/')
   }
 }
