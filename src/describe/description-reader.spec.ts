@@ -1,6 +1,7 @@
-import {DescriptionReader} from './description-reader'
-import {ArchitectureDescription} from './architecture-description'
-import {ArtifactDescription} from './artifact-description'
+import { DescriptionReader } from './description-reader'
+import { ArchitectureDescription } from './architecture-description'
+import { ArtifactDescription } from './artifact-description'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(DescriptionReader.name, () => {
   let reader: DescriptionReader

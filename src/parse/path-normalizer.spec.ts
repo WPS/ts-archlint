@@ -2,6 +2,7 @@ import { PathNormalizer } from './path-normalizer'
 import { RawCodeFile } from './raw-code-file'
 import { CodeFile } from './code-file'
 import { ImportRemaps } from '../common/import-remaps'
+import { describe, expect, it } from 'vitest'
 
 describe(PathNormalizer.name, () => {
   it('should normalize a file without dependencies', () => {

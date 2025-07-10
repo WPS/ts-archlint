@@ -1,5 +1,6 @@
 import { DependencyParser } from './dependency-parser'
 import { RawCodeFile } from './raw-code-file'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(DependencyParser.name, () => {
   const filePath = 'path/to/file/file.ts'

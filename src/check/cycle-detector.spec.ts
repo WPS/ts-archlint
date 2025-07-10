@@ -1,5 +1,6 @@
 import { CycleDetector } from './cycle-detector'
 import { Artifact } from './artifact'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(CycleDetector.name, () => {
   let detector: CycleDetector
@@ -22,13 +23,13 @@ describe(CycleDetector.name, () => {
         name: 'b',
         mayUse: 'c',
         children: [
-          { name: 'd', mayUse: 'c.e' }
+          {name: 'd', mayUse: 'c.e'}
         ]
       },
       {
         name: 'c',
         children: [
-          { name: 'e' }
+          {name: 'e'}
         ]
       }
     ])

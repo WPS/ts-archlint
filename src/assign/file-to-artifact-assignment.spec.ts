@@ -1,5 +1,7 @@
-import {FileToArtifactAssignment} from './file-to-artifact-assignment'
-import {ArtifactDescription} from '../describe/artifact-description'
+import { FileToArtifactAssignment } from './file-to-artifact-assignment'
+import { ArtifactDescription } from '../describe/artifact-description'
+
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(FileToArtifactAssignment.name, () => {
   let artifacts: ArtifactDescription[]

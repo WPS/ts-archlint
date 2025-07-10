@@ -1,5 +1,6 @@
-import {Artifact} from './artifact'
-import {ArtifactDescription} from '../describe/artifact-description'
+import { Artifact } from './artifact'
+import { ArtifactDescription } from '../describe/artifact-description'
+import { describe, expect, it } from 'vitest'
 
 describe(Artifact.name, () => {
   it('should setup mayUse for children', () => {

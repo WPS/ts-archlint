@@ -4,6 +4,7 @@ import { DependencyViolation } from './dependency-violation'
 import { FileToArtifactAssignment } from '../assign/file-to-artifact-assignment'
 import { CycleDetector } from './cycle-detector'
 import { CodeFile } from '../parse/code-file'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(DependencyChecker.name, () => {
   let architecture: ArchitectureDescription

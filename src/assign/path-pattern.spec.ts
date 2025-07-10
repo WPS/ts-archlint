@@ -1,4 +1,6 @@
-import {PathPattern} from './path-pattern'
+import { PathPattern } from './path-pattern'
+
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe(PathPattern.name, () => {
   let pattern: PathPattern
