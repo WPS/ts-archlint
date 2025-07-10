@@ -5,7 +5,6 @@ export class CycleDetector {
   findCycle(artifacts: Artifact[]): string[] | null {
     const allArtifacts = artifacts.flatMap(it => this.allArtifacts(it))
 
-
     const adjacency = this.createAdjacencyMatrix(allArtifacts)
 
     for (const artifact of allArtifacts) {
