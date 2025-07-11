@@ -1,6 +1,7 @@
 # ts-archlint
 
-Simple linter for enforcing architecture rules in typescript. Can be added to any existing lint-step with minimal overhead.
+Simple linter for enforcing architecture rules in typescript. Can be added to any existing lint-step with minimal
+overhead.
 
 https://github.com/WPS/ts-archlint
 
@@ -20,7 +21,19 @@ Everything that is not explicitly allowed is forbidden.
 
 ### concise
 
-The error output aims to be as clear and concise as possible
+The error output aims to be as clear and concise as possible.
+
+## What it can't do (yet)
+
+For now, the imports are only determined via regex match. That is simple and very fast but might cause problems or
+inaccuracies when imports don't look as expected. For the projects it was used on so far, this was good enough.
+
+A slower more accurate parsing mode with actual typescript parsing might be added in the future.
+
+Only `.ts`-files are supported for now.
+
+A file is the smallest unit this tool recognizes. If you want to check dependencies between individual classes or
+functions they need to reside in individual files.
 
 ## Getting Started
 
@@ -31,9 +44,11 @@ The error output aims to be as clear and concise as possible
 
 ## Architecture description
 
-The architecture description files describe an aspect of the architecture using artifacts. You might also call these modules.
+The architecture description files describe an aspect of the architecture using artifacts. You might also call these
+modules.
 
-Artifacts `include` a set of files based on the include pattern and each of those files must reside in an artifact that is explicitly permitted via the `mayUse` property.
+Artifacts `include` a set of files based on the include pattern and each of those files must reside in an artifact that
+is explicitly permitted via the `mayUse` property.
 
 Multiple files may model multiple aspects of an architecture.
 
@@ -93,15 +108,18 @@ Siblings may reference each other by the short name.
 
 ### Includes
 
-The includes match the full file paths including the name and support simple patterns: `**` matches anything, `*` matches anything except for slashes.
+The includes match the full file paths including the name and support simple patterns: `**` matches anything, `*`
+matches anything except for slashes.
 
-If omitted the `include` pattern defaults to `**/{{artifact-name}}/**` where `{{artifact-name}}` is the short name of the artifact. This is useful when the artifact is named exactly like its corresponding folder.
+If omitted the `include` pattern defaults to `**/{{artifact-name}}/**` where `{{artifact-name}}` is the short name of
+the artifact. This is useful when the artifact is named exactly like its corresponding folder.
 
 Files that are imported from dependency libraries are prefixed with `node-modules/` to allow easier handling.
 
 ### Excludes
 
-Some files may be excluded from the architecture, a common use case would be the exclusion of external dependencies (`node-modules/**`) or tests (`**.spec.ts`).
+Some files may be excluded from the architecture, a common use case would be the exclusion of external dependencies (
+`node-modules/**`) or tests (`**.spec.ts`).
 
 ### Ignoring dependency violations
 

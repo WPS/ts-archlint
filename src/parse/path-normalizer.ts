@@ -1,4 +1,4 @@
-import { ImportRemaps } from '../common/import-remaps'
+import { ImportRemaps } from './import-remaps'
 import { RawCodeFile } from './raw-code-file'
 import { CodeFile } from './code-file'
 import { dirname, join } from 'path'

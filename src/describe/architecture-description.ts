@@ -1,7 +1,7 @@
 import { ArtifactDescription } from './artifact-description'
-import { ImportRemaps } from '../common/import-remaps'
+import { ImportRemaps } from '../parse/import-remaps'
 
-export type DependencyMapping ={[source: string]: string|string[]}
+export type DependencyMapping = { [source: string]: string | string[] }
 
 export interface ArchitectureDescription {
   name: string

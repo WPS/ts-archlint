@@ -14,9 +14,9 @@ describe(DescriptionReader.name, () => {
 
     description = {
       name: 'hallo',
-      artifacts: [ {
+      artifacts: [{
         name: 'artifact1',
-      } ]
+      }]
     }
 
     artifact = description.artifacts[0]
