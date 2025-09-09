@@ -6,8 +6,8 @@ export class Artifact {
   private readonly mayUseArtifacts: string[] = []
   readonly children: Artifact[]
 
-  static createFrom(descriptions: ArtifactDescription[], parentNames: string | null = null): Artifact[] {
-    const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, parentNames))
+  static createFrom(descriptions: ArtifactDescription[], ancestors: ArtifactDescription[] = []): Artifact[] {
+    const artifacts: Artifact[] = descriptions.map(it => new Artifact(it, ancestors))
 
     for (let i = 0; i < artifacts.length; i++) {
       if (descriptions[i].mayUseAllBelow) {
@@ -38,16 +38,25 @@ export class Artifact {
     }
   }
 
-  private constructor(description: ArtifactDescription, parentName: string | null) {
+  private constructor(description: ArtifactDescription, ancestors: ArtifactDescription[]) {
+    const parentName = ancestors.map(it => it.name).join('.')
+
     Logger.debug(`Creating artifact ${description.name} with parent ${parentName}`)
 
-    this.name = this.joinNames(description.name, parentName)
+    this.name = this.joinNames(parentName, description.name)
     const mayUse = this.toStringArray(description.mayUse)
-    this.mayUseArtifacts.push(this.name, ...mayUse, ...mayUse.map(it => this.joinNames(it, parentName)))
-    this.children = Artifact.createFrom(description.children || [], this.name)
+    const parentMayUse = ancestors.flatMap(it => this.toStringArray(it.mayUse))
+
+    this.mayUseArtifacts.push(
+      this.name,
+      ...mayUse,
+      ...parentMayUse,
+      ...mayUse.map(it => this.joinNames(parentName, it))
+    )
+    this.children = Artifact.createFrom(description.children || [], [...ancestors, description])
   }
 
-  private joinNames(name: string, parentName: string | null): string {
+  private joinNames(parentName: string | null, name: string): string {
     return [parentName, name].filter(it => it).join('.')
   }
 
