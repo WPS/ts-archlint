@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.5.0",
+    "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
