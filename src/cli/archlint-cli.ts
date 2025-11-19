@@ -71,7 +71,10 @@ export class ArchlintCli {
     let returnCode = 0
 
     for (const checker of checkers) {
-      const normalizer = new PathNormalizer()
+      const normalizer = new PathNormalizer(
+        checker.description.tsConfigImportRemaps ?? null, 
+        checker.description.absoluteImportPath ?? null
+      )
       const normalized = codeFiles.map(it => normalizer.normalize(it))
       const result = checker.checkAll(normalized)
       reporter.reportResults(result)

@@ -16,7 +16,7 @@ export class DependencyChecker {
   private globalIncludes: PathPattern[]
 
   constructor(
-    private description: ArchitectureDescription,
+    readonly description: ArchitectureDescription,
     private assignment: FileToArtifactAssignment,
     private cycleDetector: CycleDetector,
   ) {

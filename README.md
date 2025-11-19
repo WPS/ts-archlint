@@ -146,3 +146,13 @@ This option supports patterns.
 Per default, cycles between artifacts are not allowed.
 
 This can be disabled with the `ignoreArtifactCycles` config property.
+
+### Absolute Import Paths
+
+If you use absolute imports like 'app/core/...' you need to tell ts-archlint the base path:
+
+```
+  "absoluteImportPath": "app/"
+```
+
+Otherwise absolute import paths would be treated as external dependencies and prefixed with `node_modules/`.

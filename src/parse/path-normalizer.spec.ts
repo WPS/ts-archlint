@@ -143,4 +143,56 @@ describe(PathNormalizer.name, () => {
 
     expect(normalizer.normalize(raw)).toEqual(expected)
   })
+
+  it('should map absolute import path', () => {
+    const normalizer = new PathNormalizer(undefined, 'app/')
+
+    const raw: RawCodeFile = {
+      path: 'path/to/file.ts',
+      lines: 15,
+      dependencies: [
+        {
+          importFrom: 'app/mapped-import-path/test',
+          line: 1
+        },
+      ]
+    }
+    const expected: CodeFile = {
+      path: 'path/to/file.ts',
+      lines: 15,
+      dependencies: [
+        {
+          path: 'mapped-import-path/test.ts',
+          line: 1
+        },
+      ]
+    }
+    expect(normalizer.normalize(raw)).toEqual(expected)
+  })
+
+  it('should map absolute import path without trailing slash', () => {
+    const normalizer = new PathNormalizer(undefined, 'app')
+
+    const raw: RawCodeFile = {
+      path: 'path/to/file.ts',
+      lines: 15,
+      dependencies: [
+        {
+          importFrom: 'app/mapped-import-path/test',
+          line: 1
+        },
+      ]
+    }
+    const expected: CodeFile = {
+      path: 'path/to/file.ts',
+      lines: 15,
+      dependencies: [
+        {
+          path: 'mapped-import-path/test.ts',
+          line: 1
+        },
+      ]
+    }
+    expect(normalizer.normalize(raw)).toEqual(expected)
+  })
 })

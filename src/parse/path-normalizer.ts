@@ -6,7 +6,13 @@ import { RawDependency } from './raw-dependency'
 import { Dependency } from './dependency'
 
 export class PathNormalizer {
-  constructor(private readonly tsConfigImportRemaps?: ImportRemaps) {
+  constructor(
+    private readonly tsConfigImportRemaps: ImportRemaps | null, 
+    private readonly absoluteImportPath: string | null
+  ) {
+    if (absoluteImportPath && !absoluteImportPath.endsWith('/')) {
+      this.absoluteImportPath = absoluteImportPath + '/'
+    }
   }
 
   normalize(file: RawCodeFile): CodeFile {
@@ -32,7 +38,7 @@ export class PathNormalizer {
     }
   }
 
-  private remapIfNeeded(path: string, remaps: ImportRemaps | undefined): string {
+  private remapIfNeeded(path: string, remaps: ImportRemaps | null): string {
     if (!remaps) {
       return path
     }
@@ -50,6 +56,10 @@ export class PathNormalizer {
     importFrom: string,
     noNodeModules: string[]
   ): string {
+    if (this.absoluteImportPath && importFrom.startsWith(this.absoluteImportPath)) {
+      return importFrom.replace(this.absoluteImportPath, '') + '.ts'
+    }
+
     if (!importFrom.startsWith('.') && noNodeModules.every(it => !importFrom.startsWith(it))) {
       return 'node_modules/' + importFrom
     }

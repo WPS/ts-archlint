@@ -31,6 +31,10 @@
     "ignoreArtifactCycles": {
       "type": "boolean"
     },
+    "absoluteImportPath": {
+      "type": "string",
+      "description": "The prefix of absolute import paths, e.g. app/ (if absolute import paths are used)"
+    },
     "tsConfigImportRemaps": {
       "type": "object",
       "description": "Additional paths from tsconfig.json, mapped path must be relative to rootPath",
