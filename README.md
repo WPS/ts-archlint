@@ -41,6 +41,7 @@ functions they need to reside in individual files.
 - Create a folder `.archlint` to store the JSON-description(s) of the architecture
 - Create the JSON-descriptions in this folder (see below)
 - Run via `npx ts-archlint ./src/app` where './src/app' is your main source folder
+- Or add `"ts-archlint": "ts-archlint ./src/app"` to your `package.json`
 
 ## Architecture description
 

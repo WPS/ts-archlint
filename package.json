@@ -4,7 +4,7 @@
   "description": "Simple dependency checker for typescript files",
   "main": "dist/index.js",
   "bin": {
-    "archlint": "dist/index.js"
+    "ts-archlint": "dist/index.js"
   },
   "files": [
     "/dist",
