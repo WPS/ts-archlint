@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 describe(PathNormalizer.name, () => {
   it('should normalize a file without dependencies', () => {
-    const normalizer = new PathNormalizer()
+    const normalizer = new PathNormalizer(null, null)
 
     const raw: RawCodeFile = {
       path: 'path/to/file.ts',
@@ -23,8 +23,7 @@ describe(PathNormalizer.name, () => {
   })
 
   it('should join relative paths', () => {
-    const normalizer = new PathNormalizer()
-
+    const normalizer = new PathNormalizer(null, null)
     const raw: RawCodeFile = {
       path: 'path\\to\\file.ts', // works even with windows separators
       lines: 6,
@@ -71,7 +70,7 @@ describe(PathNormalizer.name, () => {
       'mapped-import-path': 'target/of/mapping'
     }
 
-    const normalizer = new PathNormalizer(tsConfigImportRemaps)
+    const normalizer = new PathNormalizer(tsConfigImportRemaps, null)
 
     const raw: RawCodeFile = {
       path: 'path\\to\\file.ts', // works even with windows separators
@@ -118,7 +117,7 @@ describe(PathNormalizer.name, () => {
       'mapped-import-path': 'target/of/mapping'
     }
 
-    const normalizer = new PathNormalizer(tsConfigImportRemaps)
+    const normalizer = new PathNormalizer(tsConfigImportRemaps, null)
 
     const raw: RawCodeFile = {
       path: 'path/to/file.ts',
@@ -145,7 +144,7 @@ describe(PathNormalizer.name, () => {
   })
 
   it('should map absolute import path', () => {
-    const normalizer = new PathNormalizer(undefined, 'app/')
+    const normalizer = new PathNormalizer(null, 'app/')
 
     const raw: RawCodeFile = {
       path: 'path/to/file.ts',
@@ -171,7 +170,7 @@ describe(PathNormalizer.name, () => {
   })
 
   it('should map absolute import path without trailing slash', () => {
-    const normalizer = new PathNormalizer(undefined, 'app')
+    const normalizer = new PathNormalizer(null, 'app')
 
     const raw: RawCodeFile = {
       path: 'path/to/file.ts',
