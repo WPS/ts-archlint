@@ -129,4 +129,24 @@ describe(CycleDetector.name, () => {
 
     expect(detector.findCycle(artifacts)).toEqual(['a.a2.a22', 'b.b1.b12', 'b.b2', 'c.c1', 'a.a2.a22'])
   })
+
+  it('should NOT yield false positives on name prefix match', () => {
+    const artifacts = Artifact.createFrom([{
+      name: 'stammdaten',
+      include: 'stammdaten/**',
+      children: [
+        {
+          name: 'wagen',
+          'include': 'stammdaten/wagen/**'
+        },
+        {
+          name: 'wagenlauf',
+          include: 'stammdaten/wagenlauf/**',
+          mayUse: ['wagen']
+        }
+      ]
+    }])
+
+    expect(detector.findCycle(artifacts)).toBeNull()
+  })
 })
