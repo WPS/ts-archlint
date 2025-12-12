@@ -61,7 +61,9 @@ export class Artifact {
   }
 
   mayUse({name}: Artifact): boolean {
-    return this.mayUseArtifacts.some(it => name.startsWith(it))
+    return this.mayUseArtifacts.some(it =>
+      name === it || name.startsWith(it + '.')
+    )
   }
 
   private allowUsageIncludingChildren(other: Artifact): void {
