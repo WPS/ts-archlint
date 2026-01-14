@@ -10,41 +10,44 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required to act as a trusted publisher using OIDC
+      # For more information see: https://docs.npmjs.com/trusted-publishers#github-actions-configuration
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node-modules-cache
+
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
-          always-auth: 'true'
+          always-auth: true
+
       - name: Install
-        run: npm install
+        run: npm ci
+
       - name: Lint
         run: npm run lint
+
       - name: Test
         run: npm run test
+
       - name: Build
         run: npm run build
+
       - name: archlint @self
         run: npm run archlint
+
       - name: Write Version to package.json
-        run: sed -i "s/0.0.0-SNAPSHOT/${{ github.ref_name }}/" package.json && echo "Version ${{github.ref_name}}"
-        if: startsWith(github.event.ref, 'refs/tags/')
-      - name: Configure Token
-        run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-        if: startsWith(github.event.ref, 'refs/tags/')
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -i "s/0.0.0-SNAPSHOT/${{ github.ref_name }}/" package.json
+          echo "Version ${{ github.ref_name }}"
+
       - name: Publish
-        run: npm publish
-        if: startsWith(github.event.ref, 'refs/tags/')
-        permissions:
-          # Required to act as a trusted publisher using OIDC
-          # For more information see: https://docs.npmjs.com/trusted-publishers#github-actions-configuration
-          id-token: write
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npm publish --access public
