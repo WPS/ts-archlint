@@ -4,6 +4,9 @@ name: CI
 
 on: ['push']
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,3 +44,7 @@ jobs:
       - name: Publish
         run: npm publish
         if: startsWith(github.event.ref, 'refs/tags/')
+        permissions:
+          # Required to act as a trusted publisher using OIDC
+          # For more information see: https://docs.npmjs.com/trusted-publishers#github-actions-configuration
+          id-token: write
